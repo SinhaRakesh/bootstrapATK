@@ -1,0 +1,43 @@
+
+<!-- Navbar-->
+<nav class="navbar navbar-transparent navbar-fixed-top navbar-color-on-scroll">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" data-toggle="collapse" data-target="#navigation-index" class="navbar-toggle"><span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button><a href="">
+        <div class="logo-container">
+          <div class="logo"><img src="{logo_url}templates/assets/img/logo.png{/}" alt="{$company_name}" rel="tooltip" title="&lt;b&gt;Apartment buddy" data-placement="bottom" data-html="true"/></div>
+          <div class="brand">{company_name}{/}</div>
+        </div></a>
+    </div>
+    <div id="navigation-index" class="collapse navbar-collapse">
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="login"><i class="fa fa-sign-in"></i> Log In</a></li>
+        <li><a href="addapartment"><i class="fa fa-plus"> </i> Add Your Apartment</a></li>
+        <li><a rel="tooltip" title="Follow us on Twitter" data-placement="bottom" href="https://twitter.com/CreativeTim" target="_blank" class="btn btn-white btn-simple btn-just-icon"><i class="fa fa-twitter"></i></a></li>
+        <li><a rel="tooltip" title="Like us on Facebook" data-placement="bottom" href="https://www.facebook.com/CreativeTim" target="_blank" class="btn btn-white btn-simple btn-just-icon"><i class="fa fa-facebook-square"></i></a></li>
+        <li><a rel="tooltip" title="Follow us on Instagram" data-placement="bottom" href="https://www.instagram.com/CreativeTimOfficial" target="_blank" class="btn btn-white btn-simple btn-just-icon"><i class="fa fa-instagram"></i></a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<!-- End Navbar-->
+<div class="wrapper">{banner_section}
+  <div style="background-image: url('templates/assets/img/bg2.jpeg');" class="header header-filter">
+    <div class="container">{banner_content}
+      <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+          <div class="brand">
+            <h1>{title}`R`-Apartment.{/}</h1>
+            <h3>{subtitle}your apartment buddy.{/}</h3>
+          </div>
+        </div>
+      </div>{/}
+    </div>
+  </div>{/banner_section}
+  {main_content}
+  <div class="main main-raised">
+    <div class="section">
+      <div class="container">{$Content}	</div>
+    </div>
+  </div>{/}
+</div>

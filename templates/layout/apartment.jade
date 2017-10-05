@@ -1,0 +1,53 @@
+// Navbar
+nav.navbar.navbar-transparent.navbar-fixed-top.navbar-color-on-scroll
+	.container
+		.navbar-header
+			button.navbar-toggle(type='button', data-toggle='collapse', data-target='#navigation-index')
+				span.sr-only Toggle navigation
+				span.icon-bar
+				span.icon-bar
+				span.icon-bar
+			a(href='http://www.creative-tim.com')
+				.logo-container
+					.logo
+						img(src='{logo_url}templates/assets/img/logo.png{/}', alt='{$company_name}', rel='tooltip', title='<b>Material Kit</b> was Designed & Coded with care by the staff from <b>Creative Tim</b>', data-placement='bottom', data-html='true')
+					.brand
+						| {company_name}{/}
+		#navigation-index.collapse.navbar-collapse()
+			ul.nav.navbar-nav.navbar-right
+				li
+					a(href='login')
+						i.fa.fa-sign-in
+						|  Log In
+				li
+					a(href='addapartment')
+						i.fa.fa-plus 
+						|  Add Your Apartment
+				li
+					a.btn.btn-white.btn-simple.btn-just-icon(rel='tooltip', title='Follow us on Twitter', data-placement='bottom', href='https://twitter.com/CreativeTim', target='_blank')
+						i.fa.fa-twitter
+				li
+					a.btn.btn-white.btn-simple.btn-just-icon(rel='tooltip', title='Like us on Facebook', data-placement='bottom', href='https://www.facebook.com/CreativeTim', target='_blank')
+						i.fa.fa-facebook-square
+				li
+					a.btn.btn-white.btn-simple.btn-just-icon(rel='tooltip', title='Follow us on Instagram', data-placement='bottom', href='https://www.instagram.com/CreativeTimOfficial', target='_blank')
+						i.fa.fa-instagram
+// End Navbar
+.wrapper
+	{banner_section}
+	.header.header-filter(style="background-image: url('templates/assets/img/bg2.jpeg');")
+		.container
+			{banner_content}
+			.row
+				.col-md-8.col-md-offset-2
+					.brand
+						h1 {title}`R`-Apartment.{/}
+						h3 {subtitle}your apartment buddy.{/}
+			{/}
+	{/banner_section}
+	{main_content}
+	.main.main-raised
+		.section
+			.container
+				{$Content}	
+	{/}

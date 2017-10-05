@@ -1,0 +1,42 @@
+v1 Specifiction
+
+Add Apartment Registration
+	Add Apartment
+	Member/Precident Registartion
+
+
+Apartment Admin Panel
+	- dashboard
+		- total apartment balance (total deposite / total spend)
+		- total flates
+		- current month total flates / total amount
+		- current month total flates due / total amount
+		- last submitted amount grid list
+		- current month total spend (kharcha)
+		- manual submit kist
+	- add Flates Members
+		- CRUD with filters
+	- report
+		- month wise deposite report of flat member with panelty
+		- spend list
+		- panelty report		
+	- settings
+		- apartment settings
+		- email settings
+		- sms settings
+		- flat amount and panelty settings
+		- user name and password chnage
+	- notifications
+		- notification with chat
+
+
+Member Admin Panel
+	- dashboard
+		- this month total due amount and pay now
+		- grid of last paid amount
+	- add Family Member
+	- notification
+	- reports
+	- settings
+		- user name and password change
+		- flat profile
