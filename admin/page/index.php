@@ -30,7 +30,7 @@ class page_index extends Page {
                 ]
         ];
 
-        $crud = $this->add('CRUD',['frame_options'=>$fo]);
+        $crud = $this->add('CRUD');
         $crud->setModel('Outbox');
         $crud->grid->addQuickSearch(['name']);
     }
