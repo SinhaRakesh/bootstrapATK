@@ -47,3 +47,26 @@ input.ui-button,
 .ui-dialog-titlebar-close{
   float: right;
 }
+
+.ui-dialog{
+  z-index: 1001 !important;
+}
+
+
+.icon-check,
+.icon-search {
+  display: inline-block;
+  font: normal normal normal 14px/1 FontAwesome;
+  font-size: inherit;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-check:before{
+  content: "\f046";
+}
+
+.icon-search:before{
+  content: "\f002";
+}

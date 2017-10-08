@@ -4,6 +4,22 @@
  */
 class CRUD extends View_CRUD
 {	
+    // public $frame_width = 800;
+    function init(){
+        parent::init();
+
+        $this->frame_options = [
+                        "autoOpen"=>false,
+                        "modal" => true,
+                        // "width" => $this->frame_width,
+                        "title" => "Some title",
+                        "hide"=> [
+                                "effect"=> "scale",
+                                "easing"=> "easeInBack",
+                            ]
+                    ];
+    }
+
 	    /**
      * Configures necessary components when CRUD is in the editing mode.
      *

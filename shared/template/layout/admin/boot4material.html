@@ -13,8 +13,8 @@
                 <div class="navbar-header">
                     <!-- Navbar Brand -->
                     <a href="index.html" class="navbar-brand">
-                        <div class="brand-text brand-big hidden-lg-down"><span>Bootstrap </span><strong>Dashboard</strong></div>
-                        <div class="brand-text brand-small"><strong>BD</strong></div>
+                        <div class="brand-text brand-big hidden-lg-down"><span>{$company_name} </span><strong>{$page_title}</strong></div>
+                        <div class="brand-text brand-small"><strong>{$company_first_last_letter}</strong></div>
                     </a>
                     <!-- Toggle Button--><a id="toggle-btn" href="#" class="menu-btn active"><span></span><span></span><span></span></a>
                 </div>
@@ -110,7 +110,8 @@
         <!-- Sidebar Navidation Menus-->
         <span class="heading">Main</span>
         <ul class="list-unstyled">
-            <li class="active"> <a href="./"><i class="icon-home"></i>Home</a></li>
+            <li class="active"> 
+            <a href="./"><i class="icon-home"></i>Home</a></li>
             <li><a href="#dashvariants" aria-expanded="false" data-toggle="collapse"> <i class="icon-interface-windows"></i>Dropdown </a>
                 <ul id="dashvariants" class="collapse list-unstyled">
                     <li><a href="#">Page</a></li>
@@ -135,15 +136,15 @@
         <!-- Page Header-->
         <header class="page-header">
             <div class="container-fluid">
-                <h2 class="no-margin-bottom">Dashboard</h2>
+                <h2 class="no-margin-bottom">{$page_title}</h2>
             </div>
         </header>
         <!-- Dashboard Counts Section-->
-          <section class="dashboard-counts no-padding-bottom">
-            <div class="container-fluid">
-              <div class="row bg-white has-shadow">
+          <!-- <section class="dashboard-counts no-padding-bottom"> -->
+            <!-- <div class="container-fluid"> -->
+              <!-- <div class="row bg-white has-shadow"> -->
                 <!-- Item -->
-                <div class="col-xl-3 col-sm-6">
+                <!-- <div class="col-xl-3 col-sm-6">
                   <div class="item d-flex align-items-center">
                     <div class="icon bg-violet"><i class="icon-user"></i></div>
                     <div class="title"><span>New<br>Clients</span>
@@ -153,9 +154,9 @@
                     </div>
                     <div class="number"><strong>25</strong></div>
                   </div>
-                </div>
+                </div> -->
                 <!-- Item -->
-                <div class="col-xl-3 col-sm-6">
+               <!--  <div class="col-xl-3 col-sm-6">
                   <div class="item d-flex align-items-center">
                     <div class="icon bg-red"><i class="icon-padnote"></i></div>
                     <div class="title"><span>Work<br>Orders</span>
@@ -165,9 +166,9 @@
                     </div>
                     <div class="number"><strong>70</strong></div>
                   </div>
-                </div>
+                </div> -->
                 <!-- Item -->
-                <div class="col-xl-3 col-sm-6">
+                <!-- <div class="col-xl-3 col-sm-6">
                   <div class="item d-flex align-items-center">
                     <div class="icon bg-green"><i class="icon-bill"></i></div>
                     <div class="title"><span>New<br>Invoices</span>
@@ -177,9 +178,9 @@
                     </div>
                     <div class="number"><strong>44</strong></div>
                   </div>
-                </div>
+                </div> -->
                 <!-- Item -->
-                <div class="col-xl-3 col-sm-6">
+                <!-- <div class="col-xl-3 col-sm-6">
                   <div class="item d-flex align-items-center">
                     <div class="icon bg-orange"><i class="icon-check"></i></div>
                     <div class="title"><span>Open<br>Cases</span>
@@ -190,15 +191,15 @@
                     <div class="number"><strong>35</strong></div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </section>
+              </div> -->
+            <!-- </div> -->
+          <!-- </section> -->
                     <!-- Dashboard Header Section    -->
-          <section class="dashboard-header">
+          <!-- <section class="dashboard-header">
             <div class="container-fluid">
-              <div class="row">
+              <div class="row"> -->
                 <!-- Statistics -->
-                <div class="statistics col-lg-3 col-12">
+                <!-- <div class="statistics col-lg-3 col-12">
                   <div class="statistic d-flex align-items-center bg-white has-shadow">
                     <div class="icon bg-red"><i class="fa fa-tasks"></i></div>
                     <div class="text"><strong>234</strong><br><small>Applications</small></div>
@@ -211,28 +212,28 @@
                     <div class="icon bg-orange"><i class="fa fa-paper-plane-o"></i></div>
                     <div class="text"><strong>147</strong><br><small>Forwards</small></div>
                   </div>
-                </div>
+                </div> -->
                 <!-- Line Chart            -->
-                <div class="chart col-lg-6 col-12">
+               <!--  <div class="chart col-lg-6 col-12">
                   <div class="line-chart bg-white d-flex align-items-center justify-content-center has-shadow">
                     <canvas id="lineCahrt"></canvas>
                   </div>
                 </div>
-                <div class="chart col-lg-3 col-12">
+                <div class="chart col-lg-3 col-12"> -->
                   <!-- Bar Chart   -->
-                  <div class="bar-chart has-shadow bg-white">
+                  <!-- <div class="bar-chart has-shadow bg-white">
                     <div class="title"><strong class="text-violet">95%</strong><br><small>Current Server Uptime</small></div>
                     <canvas id="barChartHome"></canvas>
-                  </div>
+                  </div> -->
                   <!-- Numbers-->
-                  <div class="statistic d-flex align-items-center bg-white has-shadow">
+                  <!-- <div class="statistic d-flex align-items-center bg-white has-shadow">
                     <div class="icon bg-green"><i class="fa fa-line-chart"></i></div>
                     <div class="text"><strong>99.9%</strong><br><small>Success Rate</small></div>
                   </div>
-                </div>
-              </div>
-            </div>
-          </section>
+                </div> -->
+              <!-- </div> -->
+            <!-- </div> -->
+          <!-- </section> -->
 
         <section class="dashboard-header">
         	 <div class="container-fluid">
@@ -247,7 +248,7 @@
                   <p>Your company &copy; 2017-2019</p>
                 </div>
                 <div class="col-sm-6 text-right">
-                  <p>Design by <a href="https://bootstrapious.com/admin-templates" class="external">Bootstrapious</a></p>
+                  <p>Design by <a href="https://shreetantransh.com" class="external">Shreetantransh</a></p>
                   <!-- Please do not remove the backlink to us unless you support further theme's development at https://bootstrapious.com/donate. It is part of the license conditions. Thank you for understanding :)-->
                 </div>
               </div>
