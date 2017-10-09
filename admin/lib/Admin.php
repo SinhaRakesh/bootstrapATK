@@ -32,7 +32,8 @@ class Admin extends App_Frontend {
         $this->add('jUI');
 
         $this->add($this->layout_class);
-
+        
+        // $this->add('Layout_Fluid');
         // $this->menu = $this->layout->addMenu('Menu_Vertical');
         // $this->menu->swatch = 'ink';
         // $m = $this->layout->addFooter('Menu_Horizontal');

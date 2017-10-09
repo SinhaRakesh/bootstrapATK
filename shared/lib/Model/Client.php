@@ -30,4 +30,12 @@ class Model_Client extends Model_Base_Table{
 		return $this->add('Model_Client')->count()->getOne() + 1;
 	}
 
+
+	function updateTransaction($data=[],$import_date=null){
+
+		if(!$import_date)
+			$import_date = $this->app->now;
+
+		
+	}
 }
