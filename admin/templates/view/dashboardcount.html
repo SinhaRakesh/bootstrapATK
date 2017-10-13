@@ -1,0 +1,30 @@
+<section id="{$_name}" class="dashboard-counts no-padding-bottom {$class}" style="{$style}">
+    <div class="bg-white">
+        <div class="card-body">
+            <h3>{$heading}</h3>
+            {$heading_content}
+        </div>
+        <div class="row has-shadow">
+            <!-- Item -->
+            {rows}
+            {row}
+            <div class="{$column_class}">
+                <div class="item d-flex align-items-center">
+                    <div class="icon {$bg_color_class}">
+                      <i class="{$icon_class}"></i></div>
+                    <div class="title">
+                      <span>{$name}</span>
+                        <div class="progress">
+                            <div role="progressbar" style="width: {$progress_bar_value}%; height: 4px;" aria-valuenow="{$progress_bar_value}" aria-valuemin="0" aria-valuemax="100" class="progress-bar {$bg_color_class}"></div>
+                        </div>
+                    </div>
+                    <div class="number"><strong>{$count}</strong></div>
+                </div>
+            </div>
+            {/}{/}
+        </div>
+        <div class="footer">
+            {$footer_content}
+        </div>
+    </div>
+</section>

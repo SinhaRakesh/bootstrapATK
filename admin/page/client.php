@@ -10,8 +10,9 @@ class page_client extends Page {
         $model = $this->add('Model_Client');
         $crud = $this->add('CRUD');
         $crud->setModel($model,
-                ['name','email','contact','address','is_active'],
-                ['client_code','name','email','address','is_active']
+                ['name','contact','email','address','state_id','city_id','is_active'],
+                ['client_code','name','contact','email','address','state','city','is_active']
             );
+        
     }
 }

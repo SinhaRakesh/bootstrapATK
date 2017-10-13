@@ -45,7 +45,7 @@ class Model_Company extends Model_Base_Table{
 	function updateDailyBhav($record,$import_date=null){
 		//get all company record
 		// ['isin_number'=>['id'=>,'name'=>]]
-		$company = $this->add('Model_Company')->get();
+		$company = $this->add('Model_Company')->getRows();
 		$company_list = [];
 		foreach ($company as $m) {
 			$company_list[$m['isin_code']] = $m['id'];
@@ -60,11 +60,12 @@ class Model_Company extends Model_Base_Table{
 			// if isin number is not in company list
 			if(!isset($company_list[$data['ISIN_CODE']])){
 				$cmp = $this->add('Model_Company');
+				$cmp->addCondition('isin_code',$data['ISIN_CODE']);
 				$cmp['sc_name'] = $data['SC_NAME'];
 				$cmp['sc_code'] = $data['SC_CODE'];
 				$cmp['sc_group'] = $data['SC_GROUP'];
 				$cmp['sc_type'] = $data['SC_TYPE'];
-				$cmp['isin_code'] = $data['ISIN_CODE'];
+				// $cmp['isin_code'] = $data['ISIN_CODE'];
 				$cmp['is_active'] = true;
 				$cmp->save();
 

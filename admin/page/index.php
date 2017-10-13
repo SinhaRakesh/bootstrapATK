@@ -13,28 +13,33 @@ class page_index extends Page {
         //         '<a href="http://book.agiletoolkit.org/" target="_blank">Reading '.
         //         'the documentation</a>.');        
 
-        $form = $this->add('Form');
-        $form->addField('name');
-        $form->addField('DatePicker','dob');
-        $form->addSubmit('save');
+        // $form = $this->add('Form');
+        // $form->addField('name');
+        // $form->addField('DatePicker','dob');
+        // $form->addSubmit('save');
 
 
-        $fo = [
-            "autoOpen"=>false,
-            "modal" => true,
-            "width" => 500,
-            "title" => "Some title",
-            "hide"=> [
-                    "effect"=> "scale",
-                    "easing"=> "easeInBack",
-                ]
-        ];
+        // $fo = [
+        //     "autoOpen"=>false,
+        //     "modal" => true,
+        //     "width" => 500,
+        //     "title" => "Some title",
+        //     "hide"=> [
+        //             "effect"=> "scale",
+        //             "easing"=> "easeInBack",
+        //         ]
+        // ];
 
-        $crud = $this->add('CRUD');
-        $crud->setModel('Outbox');
-        $crud->grid->addQuickSearch(['name']);
+        // $crud = $this->add('CRUD');
+        // $crud->setModel('Outbox');
+        // $crud->grid->addQuickSearch(['name']);
 
-        $crud = $this->add('CRUD');
-        $crud->setModel('DailyBhav');
+        // $crud = $this->add('CRUD');
+        // $crud->setModel('DailyBhav');
+
+        // $crud = $this->add('CRUD');
+        // $crud->setModel('Client'); 
+
+        // $this->add('View_DashboardCount');
     }
 }

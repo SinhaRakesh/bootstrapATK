@@ -12,18 +12,18 @@
                 <!-- Navbar Header-->
                 <div class="navbar-header">
                     <!-- Navbar Brand -->
-                    <a href="index.html" class="navbar-brand">
-                        <div class="brand-text brand-big hidden-lg-down"><span>{$company_name} </span><strong>{$page_title}</strong></div>
-                        <div class="brand-text brand-small"><strong>{$company_first_last_letter}</strong></div>
+                    <a href="?page=index" class="navbar-brand">
+                        <div class="brand-text brand-big hidden-lg-down" style="display: none;"><span>{$company_name} </span><strong>Wealth Management System</strong></div>
+                        <div class="brand-text brand-small" style="display: block;"><strong>{$company_first_last_letter}WMS</strong></div>
                     </a>
-                    <!-- Toggle Button--><a id="toggle-btn" href="#" class="menu-btn active"><span></span><span></span><span></span></a>
+                    <!-- Toggle Button--><a id="toggle-btn" href="#" class="menu-btn"><span></span><span></span><span></span></a>
                 </div>
                 <!-- Navbar Menu -->
                 <ul class="nav-menu list-unstyled d-flex flex-md-row align-items-md-center">
                     <!-- Search-->
-                    <li class="nav-item d-flex align-items-center"><a id="search" href="#"><i class="icon-search"></i></a></li>
+                    <!-- <li class="nav-item d-flex align-items-center"><a id="search" href="#"><i class="icon-search"></i></a></li> -->
                     <!-- Notifications-->
-                    <li class="nav-item dropdown"> <a id="notifications" rel="nofollow" data-target="#" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="nav-link"><i class="fa fa-bell-o"></i><span class="badge bg-red">12</span></a>
+                    <!-- <li class="nav-item dropdown"> <a id="notifications" rel="nofollow" data-target="#" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="nav-link"><i class="fa fa-bell-o"></i><span class="badge bg-red">12</span></a>
                         <ul aria-labelledby="notifications" class="dropdown-menu">
                             <li>
                                 <a rel="nofollow" href="#" class="dropdown-item">
@@ -59,9 +59,9 @@
                             </li>
                             <li><a rel="nofollow" href="#" class="dropdown-item all-notifications text-center"> <strong>view all notifications                                            </strong></a></li>
                         </ul>
-                    </li>
+                    </li> -->
                     <!-- Messages                        -->
-                    <li class="nav-item dropdown"> <a id="messages" rel="nofollow" data-target="#" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="nav-link"><i class="fa fa-envelope-o"></i><span class="badge bg-orange">10</span></a>
+                    <!-- <li class="nav-item dropdown"> <a id="messages" rel="nofollow" data-target="#" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="nav-link"><i class="fa fa-envelope-o"></i><span class="badge bg-orange">10</span></a>
                         <ul aria-labelledby="notifications" class="dropdown-menu">
                             <li>
                                 <a rel="nofollow" href="#" class="dropdown-item d-flex">
@@ -89,7 +89,7 @@
                             </li>
                             <li><a rel="nofollow" href="#" class="dropdown-item all-notifications text-center"> <strong>Read all messages    </strong></a></li>
                         </ul>
-                    </li>
+                    </li> -->
                     <!-- Logout    -->
                     <li class="nav-item"><a href="login.html" class="nav-link logout">Logout<i class="fa fa-sign-out"></i></a></li>
                 </ul>
@@ -98,41 +98,44 @@
     </nav>
 </header>
 <div class="page-content d-flex align-items-stretch">
-    <nav class="side-navbar">
+    <nav class="side-navbar shrinked">
         <!-- Sidebar Header-->
-        <div class="sidebar-header d-flex align-items-center">
+        <!-- <div class="sidebar-header d-flex align-items-center" style="">
             <div class="avatar"><img src="templates/img/avatar-1.jpg" alt="..." class="img-fluid rounded-circle"></div>
             <div class="title">
                 <h1 class="h4">Mark Stephen</h1>
                 <p>Web Designer</p>
             </div>
-        </div>
+        </div> -->
         <!-- Sidebar Navidation Menus-->
-        <span class="heading">Main</span>
+        <!-- <span class="heading">Main</span> -->
         <ul class="list-unstyled">
             <li class="active"> 
-            <a href="./"><i class="icon-home"></i>Home</a></li>
-            <li><a href="#dashvariants" aria-expanded="false" data-toggle="collapse"> <i class="icon-interface-windows"></i>Dropdown </a>
+                <a href="./"><i class="fa fa-home"></i>Dashboard</a>
+            </li>
+            <!--<li><a href="#dashvariants" aria-expanded="false" data-toggle="collapse"> <i class="icon-interface-windows"></i>Dropdown </a>
                 <ul id="dashvariants" class="collapse list-unstyled">
                     <li><a href="#">Page</a></li>
                     <li><a href="#">Page</a></li>
                     <li><a href="#">Page</a></li>
                     <li><a href="#">Page</a></li>
                 </ul>
-            </li>
-            <li> <a href="tables.html"> <i class="icon-grid"></i>Tables </a></li>
-            <li> <a href="charts.html"> <i class="fa fa-bar-chart"></i>Charts </a></li>
-            <li> <a href="forms.html"> <i class="icon-padnote"></i>Forms </a></li>
-            <li> <a href="login.html"> <i class="icon-interface-windows"></i>Login Page</a></li>
-        </ul><span class="heading">Extras</span>
+            </li> -->
+            <li> <a href="?page=company"> <i class="fa fa-building-o"></i>Company </a></li>
+            <li> <a href="?page=client"> <i class="fa fa-users"></i>Client </a></li>
+            <li> <a href="?page=import"> <i class="fa fa-upload"></i>Import </a></li>
+            <li> <a href="?page=config"> <i class="fa fa-cog"></i>Config </a></li>
+            <!-- <li> <a href="login.html"> <i class="icon-interface-windows"></i>Login Page</a></li> -->
+        </ul>
+        <!-- <span class="heading">Extras</span>
         <ul class="list-unstyled">
             <li> <a href="#"> <i class="icon-flask"></i>Demo </a></li>
             <li> <a href="#"> <i class="icon-screen"></i>Demo </a></li>
             <li> <a href="#"> <i class="icon-mail"></i>Demo </a></li>
             <li> <a href="#"> <i class="icon-picture"></i>Demo </a></li>
-        </ul>
+        </ul> -->
     </nav>
-    <div class="content-inner">
+    <div class="content-inner active">
         <!-- Page Header-->
         <header class="page-header">
             <div class="container-fluid">
