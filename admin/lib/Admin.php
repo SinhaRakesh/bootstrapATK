@@ -19,6 +19,7 @@ class Admin extends App_Frontend {
     {
         parent::init();
 
+        date_default_timezone_set("Asia/Calcutta");
         $this->today = date('Y-m-d');
         $this->now = date('Y-m-d H:i:s');
 
@@ -30,6 +31,22 @@ class Admin extends App_Frontend {
 
         $this->dbConnect();
         $this->add('jUI');
+
+        // $auth = $this->add('Auth');
+        // try{
+        //     $auth->usePasswordEncryption();
+        //     $user_model = $this->add('Model_User')->addCondition('type','superadmin');
+        //     $auth->setModel($user_model,'email','password');
+        //     $auth->check();
+        // }catch(Exception $e){
+        //     $this->js(true)->univ()->errorMessage('authentication error');
+        //     // exit;
+        // }
+
+        // if($this->api->auth->model['type'] != "superadmin"){
+        //     $this->api->auth->logout();
+        //     exit;
+        // }
 
         $this->add($this->layout_class);
         
