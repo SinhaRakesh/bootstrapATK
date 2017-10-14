@@ -57,7 +57,7 @@ class Model_Client extends Model_Base_Table{
 		$client = $this->add('Model_Client')->getRows();
 		$client_list = [];
 		foreach ($client as $m) {
-			$client_list['client_code'] = $m;
+			$client_list[$m['client_code']] = $m;
 		}
 
 		$client_not_found = [];
