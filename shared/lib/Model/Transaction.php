@@ -7,6 +7,7 @@ class Model_Transaction extends Model_Base_Table{
 		parent::init();
 
 		// $this->addField('name');
+		$this->hasOne('TransactionMaster','transaction_master_id');
 		$this->hasOne('Client','client_id');
 		$this->hasOne('Company','company_id');
 

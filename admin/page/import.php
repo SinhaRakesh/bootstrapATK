@@ -16,7 +16,12 @@ class page_import extends Page {
         
         $form_client = $this->add('Form');
         $form_client->template->loadTemplateFromString("<form method='POST' action='".$this->api->url('./clientexecute')."' enctype='multipart/form-data'><input type='file' name='csv_client_file'/><input type='submit' value='Upload Client '/></form>");
-
+        
+        $form_client_buy = $this->add('Form');
+        $form_client_buy->template->loadTemplateFromString("<form method='POST' action='".$this->api->url('./clientbuyexecute')."' enctype='multipart/form-data'><input type='file' name='csv_client_buy_file'/><input type='submit' value='Upload Client Wise Buy Data'/></form>");
+        
+        $form_client_sell = $this->add('Form');
+        $form_client_sell->template->loadTemplateFromString("<form method='POST' action='".$this->api->url('./clientsellexecute')."' enctype='multipart/form-data'><input type='file' name='csv_client_sell_file'/><input type='submit' value='Upload Client Wise Sell Data'/></form>");
     }
 
     function page_bhavexecute(){
@@ -155,7 +160,97 @@ class page_import extends Page {
                 unset($_FILES['csv_client_file']);
             }
         }
-
     }
+
+    function page_clientbuyexecute(){
+        ini_set('max_execution_time', 0);
+
+        if($_FILES['csv_client_buy_file']){
+            if ( $_FILES["csv_client_buy_file"]["error"] > 0 ) {
+                $this->add( 'View_Error' )->set( "Error: " . $_FILES["csv_client_buy_file"]["error"] );
+            }else{
+                $mimes = ['text/comma-separated-values', 'text/csv', 'application/csv', 'application/excel', 'application/vnd.ms-excel', 'application/vnd.msexcel', 'text/anytext'];
+                if(!in_array($_FILES['csv_client_buy_file']['type'],$mimes)){
+                    $this->add('View_Error')->set('Only CSV Files allowed');
+                    return;
+                }
+                
+                $importer = new CSVImporter($_FILES['csv_client_buy_file']['tmp_name'],true,',');
+                $data = $importer->get();
+
+                $client = $this->add('Model_Client');
+                $result = $client->updateClientWiseData($data,"Buy");
+
+                 $count_result = [
+                    0 =>[
+                            'name'=>"Total Client Buy List",
+                            'icon_class'=>"fa fa-users",
+                            'bg_color_class'=>"bg-violet",
+                            'count'=>$result['total_data_to_import'],
+                            'column_class'=>"col-xl-4 col-sm-12"
+                        ],
+                    1 =>[
+                            'name'=>"Total Client Buy List Imported",
+                            'icon_class'=>"fa fa-users",
+                            'bg_color_class'=>"bg-violet",
+                            'count'=>$result['total_data_imported'],
+                            'column_class'=>"col-xl-4 col-sm-12"
+                        ]
+                    ];
+                $dc = $this->add('View_DashboardCount',['heading'=>'Client wise buy list']);
+                $dc->setStyle('padding-top',0);
+                $dc->setSource($count_result);
+
+                unset($_FILES['csv_client_buy_file']);
+                
+            }
+        }
+    }
+
+    function page_clientsellexecute(){
+        ini_set('max_execution_time', 0);
+
+        if($_FILES['csv_client_sell_file']){
+            if ( $_FILES["csv_client_sell_file"]["error"] > 0 ) {
+                $this->add( 'View_Error' )->set( "Error: " . $_FILES["csv_client_sell_file"]["error"] );
+            }else{
+                $mimes = ['text/comma-separated-values', 'text/csv', 'application/csv', 'application/excel', 'application/vnd.ms-excel', 'application/vnd.msexcel', 'text/anytext'];
+                if(!in_array($_FILES['csv_client_sell_file']['type'],$mimes)){
+                    $this->add('View_Error')->set('Only CSV Files allowed');
+                    return;
+                }
+                
+                $importer = new CSVImporter($_FILES['csv_client_sell_file']['tmp_name'],true,',');
+                $data = $importer->get();
+
+                $client = $this->add('Model_Client');
+                $result = $client->updateClientWiseData($data,"Sell");
+
+                 $count_result = [
+                    0 =>[
+                            'name'=>"Total Client Sell List",
+                            'icon_class'=>"fa fa-users",
+                            'bg_color_class'=>"bg-violet",
+                            'count'=>$result['total_data_to_import'],
+                            'column_class'=>"col-xl-4 col-sm-12"
+                        ],
+                    1 =>[
+                            'name'=>"Total Client Sell List Imported",
+                            'icon_class'=>"fa fa-users",
+                            'bg_color_class'=>"bg-violet",
+                            'count'=>$result['total_data_imported'],
+                            'column_class'=>"col-xl-4 col-sm-12"
+                        ]
+                    ];
+                $dc = $this->add('View_DashboardCount',['heading'=>'Client wise buy list']);
+                $dc->setStyle('padding-top',0);
+                $dc->setSource($count_result);
+
+                unset($_FILES['csv_client_buy_file']);
+                
+            }
+        }
+    }
+
 
 }

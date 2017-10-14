@@ -176,4 +176,84 @@ class Model_Client extends Model_Base_Table{
 			'total_old_client' => count($old_client)
 		];
 	}
+
+
+	function updateClientWiseData($record,$type){
+		$import_date = $this->app->now;
+
+		$company = $this->add('Model_Company')->getRows();
+		$company_list = [];
+		foreach ($company as $m) {
+			$company_list[$m['isin_code']] = $m;
+		}
+
+		$client = $this->add('Model_Client')->getRows();
+		$client_list = [];
+		foreach ($client as $m) {
+			$client_list[$m['client_code']] = $m;
+		}
+
+		$client_not_found = [];
+		$company_not_found = [];
+		$total_record_inserted = 0;
+
+		$fields = ['transaction_master_id','client_id','company_id','created_at','sell_qty','sell_value','net_value','net_qty','import_date'];
+		if($type == "Buy"){
+			$fields = ['transaction_master_id','client_id','company_id','created_at','buy_qty','buy_value','net_value','net_qty','import_date'];
+		}
+
+		$tm = $this->add('Model_TransactionMaster');
+		if($type == "Buy")
+			$tm['name'] = 'client_buy_data';
+		else
+			$tm['name'] = 'client_sell_data';
+		$tm->save();
+
+		$insert_query = "INSERT into transaction (".trim(implode(",", $fields),',').") VALUES ";
+		foreach ($record as $data) {
+			$client_code = trim($data['Client ID']);
+
+			if(!isset($company_list[$data['Symbol']])){
+				$company_not_found[$data['Symbol']] = $data;
+				continue;
+			}
+
+			if(!isset($client_list[$client_code])){
+				$client_not_found[$client_code] = $data;
+				continue;
+			}
+
+			$client_id = $client_list[$client_code]['id'];
+			$client_name = $client_list[$client_code]['name'];
+			$company_id = $company_list[$data['Symbol']]['id'];
+
+			if($type == "Buy"){
+				$net_qty = $qty = $data['Qty buy'];
+				$net_value = $price = $data['Buy Price'];
+				$created_at = date('Y-m-d',strtotime($data['Date of purchase']));
+			}else{
+				$qty = $data['Qty sold'];
+				$price = $data['Selling Price'];
+				$net_qty = $qty *( -1);
+				$net_value = $price *( -1);
+				$created_at = date('Y-m-d',strtotime($data['Date of selling']));
+			}
+
+			$insert_query .= "('".$tm->id."','".$client_id."','".$company_id."','".$created_at."','".$qty."','".$price."','".$net_value."','".$net_qty."','".$import_date."'),";
+			$total_record_inserted++;
+		}
+
+		if($total_record_inserted){
+			$insert_query = trim($insert_query,',');
+			$this->app->db->dsql()->expr($insert_query)->execute();
+		}
+		
+		return [
+				'total_data_to_import' => count($record),
+				'total_data_imported' => $total_record_inserted,
+				'total_client_not_found' => count($client_not_found),
+				'total_company_not_found' => count($company_not_found)
+			];
+	}
+
 }
