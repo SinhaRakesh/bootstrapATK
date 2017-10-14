@@ -10,10 +10,12 @@ class Model_Client extends Model_Base_Table{
 		$this->hasOne('City','city_id');
 		
 		$this->addField('name');
-		$this->addField('client_code');
-		$this->addField('contact')->type('number');
-		$this->addField('email');
-		$this->addField('address');
+		$this->addField('client_code')->caption('Client ID');
+		$this->addField('phone_number')->type('number');
+		$this->addField('email_id');
+		$this->addField('address1');
+		$this->addField('address2');
+		$this->addField('pin_code');
 
 		$this->addField('is_active')->type('boolean')->defaultValue(true);
 		$this->addField('created_at')->type('datetime')->defaultValue($this->app->now)->system(true);
@@ -21,13 +23,19 @@ class Model_Client extends Model_Base_Table{
 		$this->hasMany('Transaction','client_id');
 
 		$this->add('dynamic_model/Controller_AutoCreator');
-
-		// $this->addHook('beforeSave',$this);
+		$this->addHook('beforeSave',$this);
 	}
 
 	function beforeSave(){
 		if(!$this['client_code'])
-			$this['client_code'] = "UDR-".$this->nextID();
+			throw $this->exception('Client ID Must not be empty', 'ValidityCheck')->setField('client_code');
+		
+		$old = $this->add('Model_Client');
+		$old->addCondition('client_code',$this['client_code']);
+		$old->addCondition('id','<>',$this->id);
+		$old->tryLoadAny();
+		if($old->loaded())
+			throw $this->exception('Client ID is already in use', 'ValidityCheck')->setField('client_code');
 	}
 
 	function nextID(){
@@ -112,24 +120,48 @@ class Model_Client extends Model_Base_Table{
 			$client_list[$m['client_code']] = $m;
 		}
 
+		$state = $this->add('Model_State')->getRows();
+		$state_list = [];
+		foreach ($state as $m) {
+			$state_list[strtolower(trim($m['name']))] = $m['id'];
+		}
+
+		$city = $this->add('Model_City')->getRows();
+		$city_list = [];
+		foreach ($city as $m) {
+			$city_list[strtolower(trim($m['name']))] = $m['id'];
+		}
+
 		$old_client = [];
 
 		$total_record_inserted = 0;
-		$insert_query = "INSERT into client (client_code,name,email,contact,address,is_active,created_at) VALUES ";
+		$insert_query = "INSERT into client (client_code,name,email_id,phone_number,address1,address2,city_id,state_id,pin_code,is_active,created_at) VALUES ";
 		foreach ($record as $data) {
-			$client_code = trim($data['Client Code']);
 
+			$client_code = trim($data['Client ID']);
 			if(isset($client_list[$client_code])){
-				$old_client[$client_code] = $data;
+				if(!isset($client_list[$client_code]['is_new'])){
+					$old_client[$client_code] = $data;
+				}
 				continue;
 			}
-			$insert_query .= "('".$client_code."','".$data['Name']."','".$data['Email']."','".$data['Contact']."','".$data['Address']."',1,'".$this->app->now."'),";
+
+			$city_id = 0;
+			$state_id = 0;
+			if(isset($city_list[strtolower(trim($data['City']))]))
+				$city_id = $city_list[strtolower(trim($data['City']))];
+
+			if(isset($state_list[strtolower(trim($data['State']))]))
+				$state_id = $state_list[strtolower(trim($data['State']))];
+
+			$insert_query .= "('".$client_code."','".$data['Client Name']."','".$data['Email Address']."','".$data['Phone number']."','".$data['Address1']."','".$data['Address2']."','".$city_id."','".$state_id."','".$data['pin_code']."',1,'".$this->app->now."'),";
 			
 			$total_record_inserted++;
 			$client_list[$data['Client Code']] = [
 												'name'=>$data['Name'],
-												'email'=>$data['Email'],
-												'contact'=>$data['Contact']
+												'email'=>$data['Email Address'],
+												'contact'=>$data['Phone number'],
+												'is_new'=>1
 											];
 		}
 
@@ -139,7 +171,7 @@ class Model_Client extends Model_Base_Table{
 		}
 
 		return [
-			'total_data_to_import' => count($data),
+			'total_data_to_import' => count($record),
 			'total_data_imported' => $total_record_inserted,
 			'total_old_client' => count($old_client)
 		];
