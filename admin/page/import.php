@@ -7,21 +7,20 @@ class page_import extends Page {
     function page_index() {
         // parent::init();
 
-
         $form_bhav = $this->add('Form');
-        $form_bhav->template->loadTemplateFromString("<form method='POST' action='".$this->api->url('./bhavexecute')."' enctype='multipart/form-data'><input type='file' name='csv_bhav_file'/><input type='submit' value='Upload Daily Bhav'/></form>");
+        $form_bhav->template->loadTemplateFromString('<form method="POST" action="'.$this->api->url('./bhavexecute').'" enctype="multipart/form-data"><div class="project"><div class="row bg-white has-shadow"><div class="project-title d-flex align-items-center col-md-4">  <div class="text"><h3 class="h4">Upload Daily BHAV</h3></div></div><div class="col-md-5"><input name="csv_bhav_file" type="file">  </div><div class="col-md-3"><input value="Upload" class="btn btn-primary" type="submit"></div></div></div></form>');
         
         $form_tran = $this->add('Form');
-        $form_tran->template->loadTemplateFromString("<form method='POST' action='".$this->api->url('./tranexecute')."' enctype='multipart/form-data'><input type='file' name='csv_tran_file'/><input type='submit' value='Upload Client Transaction'/></form>");
+        $form_tran->template->loadTemplateFromString('<form method="POST" action="'.$this->api->url('./tranexecute').'" enctype="multipart/form-data"><div class="project"><div class="row bg-white has-shadow"><div class="project-title d-flex align-items-center col-md-4">  <div class="text"><h3 class="h4">Upload Client Daily Transaction</h3></div></div><div class="col-md-5"><input type="file" name="csv_tran_file"/> </div><div class="col-md-3"><input type="submit" class="btn btn-primary" value="Upload"/></div></div></div></form>');
         
         $form_client = $this->add('Form');
-        $form_client->template->loadTemplateFromString("<form method='POST' action='".$this->api->url('./clientexecute')."' enctype='multipart/form-data'><input type='file' name='csv_client_file'/><input type='submit' value='Upload Client '/></form>");
+        $form_client->template->loadTemplateFromString('<form method="POST" action="'.$this->api->url('./clientexecute').'" enctype="multipart/form-data"><div class="project"><div class="row bg-white has-shadow"><div class="project-title d-flex align-items-center col-md-4"><div class="text"><h3 class="h4">Upload Client</h3></div></div><div class="col-md-5"><input type="file" name="csv_client_file" /> </div><div class="col-md-3"><input type="submit" class="btn btn-primary" value="Upload" /></div></div></div></form>');
         
         $form_client_buy = $this->add('Form');
-        $form_client_buy->template->loadTemplateFromString("<form method='POST' action='".$this->api->url('./clientbuyexecute')."' enctype='multipart/form-data'><input type='file' name='csv_client_buy_file'/><input type='submit' value='Upload Client Wise Buy Data'/></form>");
+        $form_client_buy->template->loadTemplateFromString('<form method="POST" action="'.$this->api->url('./clientbuyexecute').'" enctype="multipart/form-data"><div class="project"><div class="row bg-white has-shadow"><div class="project-title d-flex align-items-center col-md-4"><div class="text"><h3 class="h4">Upload Client Wise Buy Data</h3></div></div><div class="col-md-5"><input type="file" name="csv_client_buy_file" /> </div><div class="col-md-3"><input type="submit" class="btn btn-primary" value="Upload" /></div></div></div></form>');
         
         $form_client_sell = $this->add('Form');
-        $form_client_sell->template->loadTemplateFromString("<form method='POST' action='".$this->api->url('./clientsellexecute')."' enctype='multipart/form-data'><input type='file' name='csv_client_sell_file'/><input type='submit' value='Upload Client Wise Sell Data'/></form>");
+        $form_client_sell->template->loadTemplateFromString('<form method="POST" action="'.$this->api->url('./clientbuyexecute').'" enctype="multipart/form-data"><div class="project"><div class="row bg-white has-shadow"><div class="project-title d-flex align-items-center col-md-4"><div class="text"><h3 class="h4">Upload Client Wise Sell Data</h3></div></div><div class="col-md-5"><input type="file" name="csv_client_sell_file" /> </div><div class="col-md-3"><input type="submit" class="btn btn-primary" value="Upload" /></div></div></div></form>');
     }
 
     function page_bhavexecute(){

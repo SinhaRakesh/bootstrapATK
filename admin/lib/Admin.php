@@ -32,24 +32,19 @@ class Admin extends App_Frontend {
         $this->dbConnect();
         $this->add('jUI');
 
-        // $auth = $this->add('Auth');
-        // try{
-        //     $auth->usePasswordEncryption();
-        //     $user_model = $this->add('Model_User')->addCondition('type','superadmin');
-        //     $auth->setModel($user_model,'email','password');
-        //     $auth->check();
-        // }catch(Exception $e){
-        //     $this->js(true)->univ()->errorMessage('authentication error');
-        //     // exit;
-        // }
+        $active_user = $this->add('Model_User')->addCondition('is_active',true);
+        $auth = $this->app->add('BasicAuth');
 
-        // if($this->api->auth->model['type'] != "superadmin"){
-        //     $this->api->auth->logout();
-        //     exit;
-        // }
+        $this->app->add('Layout_Centered');
+        $auth->usePasswordEncryption();
+        $auth->setModel($active_user);
+        $auth->check();
 
-        $this->add($this->layout_class);
-        
+        if($auth->isLoggedIn()){
+            $this->app->layout->destroy();
+            $this->add($this->layout_class);
+        }
+       
         // $this->add('Layout_Fluid');
         // $this->menu = $this->layout->addMenu('Menu_Vertical');
         // $this->menu->swatch = 'ink';

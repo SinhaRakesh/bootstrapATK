@@ -22,8 +22,17 @@ class Model_Client extends Model_Base_Table{
 
 		$this->hasMany('Transaction','client_id');
 
-		$this->add('dynamic_model/Controller_AutoCreator');
 		$this->addHook('beforeSave',$this);
+		$this->addHook('beforeDelete',$this);
+		$this->add('dynamic_model/Controller_AutoCreator');
+	}
+
+	function beforeDelete(){
+		$transaction = $this->add('Model_Transaction');
+		$transaction->addCondition('client_id',$this->id);
+		if($transaction->count()->getOne()){
+			throw new \Exception("Cannot Delete, its has transaction");
+		}
 	}
 
 	function beforeSave(){
