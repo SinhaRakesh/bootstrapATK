@@ -22,6 +22,11 @@ class Admin extends App_Frontend {
         date_default_timezone_set("Asia/Calcutta");
         $this->today = date('Y-m-d');
         $this->now = date('Y-m-d H:i:s');
+        $this->app->addMethod('nextDate',function($app,$date=null){    
+            if(!$date) $date = $this->api->today;
+            $date = date("Y-m-d", strtotime(date("Y-m-d", strtotime($date)) . " +1 DAY"));    
+            return $date;
+        });
 
         $this->api->pathfinder
             ->addLocation(array(

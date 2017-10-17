@@ -7,6 +7,12 @@ class page_index extends Page {
     function init() {
         parent::init();
 
+
+        $m = $this->add('Model_ClientData');
+
+        $grid = $this->add('Grid');
+        $grid->setModel($m,['name','today_buying_value','today_sell_value']);
+
         // $this->add('View_Box')
         //     ->setHTML('Welcome to your new Web App Project. Get started by opening '.
         //         '<b>admin/page/index.php</b> file in your text editor and '.

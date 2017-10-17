@@ -32,7 +32,10 @@ class Model_Transaction extends Model_Base_Table{
 		
 		$this->addField('created_at')->type('datetime')->set($this->app->now);
 		$this->addField('import_date')->type('datetime'); // import date in software system
-				
+		
+		$this->addExpression('master_type')->set(function($m,$q){
+			return $q->expr('IFNULL([0],0)',[$m->ref('transaction_master_id')->fieldQuery('name')]);
+		});
 		$this->add('dynamic_model/Controller_AutoCreator');
 	}
 }

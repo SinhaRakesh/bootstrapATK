@@ -239,13 +239,14 @@ class Model_Client extends Model_Base_Table{
 			if($type == "Buy"){
 				$net_qty = $qty = $data['Qty buy'];
 				$net_value = $price = $data['Buy Price'];
-				$created_at = date('Y-m-d',strtotime($data['Date of purchase']));
+				$created_at = date('Y-m-d',strtotime(str_replace("/","-",$data['Date of purchase'])));
 			}else{
 				$qty = $data['Qty sold'];
-				$price = $data['Selling Price'];
+				$price = $data['Selling price'];
 				$net_qty = $qty *( -1);
 				$net_value = $price *( -1);
-				$created_at = date('Y-m-d',strtotime($data['Date of selling']));
+
+				$created_at = date('Y-m-d',strtotime(str_replace("/","-",$data['Date of selling'])));
 			}
 
 			$insert_query .= "('".$tm->id."','".$client_id."','".$company_id."','".$created_at."','".$qty."','".$price."','".$net_value."','".$net_qty."','".$import_date."'),";
