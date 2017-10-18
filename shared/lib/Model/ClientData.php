@@ -11,7 +11,6 @@ class Model_ClientData extends Model_Client{
 		$this->getElement('name')->caption('Client');
 
 		$this->addExpression('today_buying_value')->set(function($m,$q){
-
 			$t = $m->add('Model_Transaction')
 				->addCondition('client_id',$m->fieldQuery('id'))
 				->addCondition('created_at','>=',$this->on_date)
@@ -35,5 +34,13 @@ class Model_ClientData extends Model_Client{
 			}
 			return $q->expr('IFNULL([0],0)',[$t->fieldQuery('sell_value')]);
 		});
+
+		$this->addExpression('short_term_capital_gain')->set(function($m,$q){
+			return "'0'";
+			// return $q->expr();
+		});
+		
+		$this->addExpression('long_term_capital_gain')->set("'0'");
+
 	}
 }

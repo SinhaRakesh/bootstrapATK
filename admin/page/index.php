@@ -7,11 +7,20 @@ class page_index extends Page {
     function init() {
         parent::init();
 
+        $on_date = $this->app->stickyGET('date');
+        if(!$on_date) $on_date = $this->app->today;
 
-        $m = $this->add('Model_ClientData');
+        $form = $this->add('Form');
+        $form->addField('DatePicker','date')->set($on_date);
+        $form->addSubmit('filter');
 
+        $m = $this->add('Model_ClientData',['on_date'=>$on_date]);
         $grid = $this->add('Grid');
-        $grid->setModel($m,['name','today_buying_value','today_sell_value']);
+        $grid->setModel($m,['name','today_buying_value','today_sell_value','short_term_capital_gain','long_term_capital_gain']);
+
+        if($form->isSubmitted()){
+            $grid->js()->reload(['date'=>$form['date']])->execute();
+        }
 
         // $this->add('View_Box')
         //     ->setHTML('Welcome to your new Web App Project. Get started by opening '.

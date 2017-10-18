@@ -30,12 +30,26 @@ class Model_Transaction extends Model_Base_Table{
 		$this->addField('buy_qty')->type('Number');
 		$this->addField('net_qty')->type('Number');
 		
+		$this->addField('buy_amount')->type('money');
+		$this->addField('sell_amount')->type('money');
+
 		$this->addField('created_at')->type('datetime')->set($this->app->now);
 		$this->addField('import_date')->type('datetime'); // import date in software system
 		
 		$this->addExpression('master_type')->set(function($m,$q){
 			return $q->expr('IFNULL([0],0)',[$m->ref('transaction_master_id')->fieldQuery('name')]);
 		});
+
+		// $this->addExpression('buy_amount')->set('IFNULL(buy_value,0) * IFNULL(buy_qty,0)');
+		// $this->addExpression('sell_amount')->set('IFNULL(sell_value,0) * IFNULL(sell_qty,0)');
+
+		$this->addHook('beforeSave',$this);
+
 		$this->add('dynamic_model/Controller_AutoCreator');
+	}
+
+	function beforeSave(){
+		$this['buy_amount'] = $this['buy_qty'] * $this['buy_value'];
+		$this['sell_amount'] = $this['sell_qty'] * $this['sell_value'];
 	}
 }
