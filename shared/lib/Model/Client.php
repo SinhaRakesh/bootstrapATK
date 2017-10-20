@@ -242,16 +242,17 @@ class Model_Client extends Model_Base_Table{
 
 			$insert_query = "INSERT into transaction (".trim(implode(",", $fields),',').") VALUES ";
 			foreach ($record as $data) {
+
 				$client_code = trim($data['CLIENT ID']);
 
 				if(!isset($company_list[$data['SYMBOL']])){
-					echo "company not found ".$data['SYMBOL']."<br/>";
+					// echo "company not found ".$data['SYMBOL']."<br/>";
 					$company_not_found[$data['SYMBOL']] = $data;
 					continue;
 				}
 
 				if(!isset($client_list[$client_code])){
-					echo "client not found ".$client_code."<br/>";
+					// echo "client not found ".$client_code."<br/>";
 					$client_not_found[$client_code] = $data;
 					continue;
 				}
