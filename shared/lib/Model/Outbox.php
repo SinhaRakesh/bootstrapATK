@@ -16,7 +16,7 @@ class Model_Outbox extends Model_Base_Table{
 		$this->addField('from_member_id');
 		$this->addField('user_id');
 
-		$this->add('dynamic_model/Controller_AutoCreator');
+		// $this->add('dynamic_model/Controller_AutoCreator');
 		$this->addHook('beforeSave',$this);
 	}
 

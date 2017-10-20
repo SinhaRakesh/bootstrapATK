@@ -11,6 +11,8 @@ class Model_ClientData extends Model_Client{
 		$this->getElement('name')->caption('Client');
 
 		$this->addExpression('today_buying_value')->set(function($m,$q){
+			return "'0'";
+			
 			$t = $m->add('Model_Transaction')
 				->addCondition('client_id',$m->fieldQuery('id'))
 				->addCondition('created_at','>=',$this->on_date)
@@ -23,7 +25,7 @@ class Model_ClientData extends Model_Client{
 		});
 		
 		$this->addExpression('today_sell_value')->set(function($m,$q){
-
+			return "'0'";
 			$t = $m->add('Model_Transaction')
 				->addCondition('client_id',$m->fieldQuery('id'))
 				->addCondition('created_at','>=',$this->on_date)

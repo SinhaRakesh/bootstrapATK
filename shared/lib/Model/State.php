@@ -10,6 +10,6 @@ class Model_State extends Model_Base_Table{
 		$this->addField('is_active')->type('boolean')->defaultValue(true);
 		
 		$this->hasMany('City','state_id');
-		$this->add('dynamic_model/Controller_AutoCreator');
+		// $this->add('dynamic_model/Controller_AutoCreator');
 	}
 }

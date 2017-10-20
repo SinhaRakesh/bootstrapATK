@@ -20,7 +20,7 @@ class Model_DailyBhav extends Model_Base_Table{
 		$this->addField('created_at')->type('datetime')->set($this->app->now);
 		$this->addField('import_date')->type('datetime'); // import date in software system
 
-		$this->add('dynamic_model/Controller_AutoCreator');
+		// $this->add('dynamic_model/Controller_AutoCreator');
 	}
 
 

@@ -196,11 +196,12 @@ class page_import extends Page {
                             'column_class'=>"col-xl-4 col-sm-12"
                         ]
                     ];
+                
+                unset($_FILES['csv_client_buy_file']);
                 $dc = $this->add('View_DashboardCount',['heading'=>'Client wise buy list']);
                 $dc->setStyle('padding-top',0);
                 $dc->setSource($count_result);
 
-                unset($_FILES['csv_client_buy_file']);
                 
             }
         }

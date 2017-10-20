@@ -45,7 +45,7 @@ class Model_Transaction extends Model_Base_Table{
 
 		$this->addHook('beforeSave',$this);
 
-		$this->add('dynamic_model/Controller_AutoCreator');
+		// $this->add('dynamic_model/Controller_AutoCreator');
 	}
 
 	function beforeSave(){

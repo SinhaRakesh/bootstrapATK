@@ -10,6 +10,6 @@ class Model_User extends Model_Base_Table{
 		$this->addField('password')->type('password');
 		$this->addField('is_active')->type('boolean');
 		
-		$this->add('dynamic_model/Controller_AutoCreator');
+		// $this->add('dynamic_model/Controller_AutoCreator');
 	}
 }

@@ -10,6 +10,6 @@ class Model_Template extends Model_Base_Table{
 		$this->addField('subject');
 		$this->addField('body')->type('text');
 		
-		$this->add('dynamic_model/Controller_AutoCreator');
+		// $this->add('dynamic_model/Controller_AutoCreator');
 	}
 }
