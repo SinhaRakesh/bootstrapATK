@@ -3,8 +3,11 @@
 class Model_Transaction extends Model_Base_Table{
 	public $table = "transaction";
 
+	public $from_date;
 	function init(){
 		parent::init();
+
+		if(!$this->from_date) $this->from_date = $this->app->today;
 
 		// $this->addField('name');
 		$this->hasOne('TransactionMaster','transaction_master_id');
@@ -39,9 +42,9 @@ class Model_Transaction extends Model_Base_Table{
 		$this->addExpression('master_type')->set(function($m,$q){
 			return $q->expr('IFNULL([0],0)',[$m->ref('transaction_master_id')->fieldQuery('name')]);
 		});
-
-		// $this->addExpression('buy_amount')->set('IFNULL(buy_value,0) * IFNULL(buy_qty,0)');
-		// $this->addExpression('sell_amount')->set('IFNULL(sell_value,0) * IFNULL(sell_qty,0)');
+		
+		$this->addExpression('buy_amount')->set('IFNULL(buy_value,0) * IFNULL(buy_qty,0)');
+		$this->addExpression('sell_amount')->set('IFNULL(sell_value,0) * IFNULL(sell_qty,0)');
 
 		$this->addHook('beforeSave',$this);
 

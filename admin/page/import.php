@@ -10,12 +10,12 @@ class page_import extends Page {
         $form_bhav = $this->add('Form');
         $form_bhav->template->loadTemplateFromString('<form method="POST" action="'.$this->api->url('./bhavexecute').'" enctype="multipart/form-data"><div class="project"><div class="row bg-white has-shadow"><div class="project-title d-flex align-items-center col-md-4">  <div class="text"><h3 class="h4">Upload Daily BHAV</h3></div></div><div class="col-md-5"><input name="csv_bhav_file" type="file">  </div><div class="col-md-3"><input value="Upload" class="btn btn-primary" type="submit"></div></div></div></form>');
         
-        $form_tran = $this->add('Form');
-        $form_tran->template->loadTemplateFromString('<form method="POST" action="'.$this->api->url('./tranexecute').'" enctype="multipart/form-data"><div class="project"><div class="row bg-white has-shadow"><div class="project-title d-flex align-items-center col-md-4">  <div class="text"><h3 class="h4">Upload Client Daily Transaction</h3></div></div><div class="col-md-5"><input type="file" name="csv_tran_file"/> </div><div class="col-md-3"><input type="submit" class="btn btn-primary" value="Upload"/></div></div></div></form>');
-        
         $form_client = $this->add('Form');
         $form_client->template->loadTemplateFromString('<form method="POST" action="'.$this->api->url('./clientexecute').'" enctype="multipart/form-data"><div class="project"><div class="row bg-white has-shadow"><div class="project-title d-flex align-items-center col-md-4"><div class="text"><h3 class="h4">Upload Client</h3></div></div><div class="col-md-5"><input type="file" name="csv_client_file" /> </div><div class="col-md-3"><input type="submit" class="btn btn-primary" value="Upload" /></div></div></div></form>');
-        
+
+        $form_tran = $this->add('Form');
+        $form_tran->template->loadTemplateFromString('<form method="POST" action="'.$this->api->url('./tranexecute').'" enctype="multipart/form-data"><div class="project"><div class="row bg-white has-shadow"><div class="project-title d-flex align-items-center col-md-4">  <div class="text"><h3 class="h4">Upload Client Daily Transaction</h3></div></div><div class="col-md-5"><input type="file" name="csv_tran_file"/> </div><div class="col-md-3"><input type="submit" class="btn btn-primary" value="Upload"/></div></div></div></form>');
+                
         $form_client_buy = $this->add('Form');
         $form_client_buy->template->loadTemplateFromString('<form method="POST" action="'.$this->api->url('./clientbuyexecute').'" enctype="multipart/form-data"><div class="project"><div class="row bg-white has-shadow"><div class="project-title d-flex align-items-center col-md-4"><div class="text"><h3 class="h4">Upload Client Wise Buy Data</h3></div></div><div class="col-md-5"><input type="file" name="csv_client_buy_file" /> </div><div class="col-md-3"><input type="submit" class="btn btn-primary" value="Upload" /></div></div></div></form>');
         

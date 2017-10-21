@@ -225,9 +225,9 @@ class Model_Client extends Model_Base_Table{
 		$company_not_found = [];
 		$total_record_inserted = 0;
 
-		$fields = ['transaction_master_id','client_id','company_id','created_at','sell_qty','sell_value','net_value','net_qty','import_date'];
+		$fields = ['transaction_master_id','client_id','company_id','created_at','sell_qty','sell_value','net_value','net_qty','sell_amount','import_date'];
 		if($type == "Buy"){
-			$fields = ['transaction_master_id','client_id','company_id','created_at','buy_qty','buy_value','net_value','net_qty','import_date'];
+			$fields = ['transaction_master_id','client_id','company_id','created_at','buy_qty','buy_value','net_value','net_qty','buy_amount','import_date'];
 		}
 
 		try{
@@ -274,7 +274,7 @@ class Model_Client extends Model_Base_Table{
 					$created_at = date('Y-m-d',strtotime(str_replace("/","-",$data['DATE OF SELLING'])));
 				}
 
-				$insert_query .= "('".$tm->id."','".$client_id."','".$company_id."','".$created_at."','".$qty."','".$price."','".$net_value."','".$net_qty."','".$import_date."'),";
+				$insert_query .= "('".$tm->id."','".$client_id."','".$company_id."','".$created_at."','".$qty."','".$price."','".$net_value."','".$net_qty."','".($qty * $price)."','".$import_date."'),";
 				$total_record_inserted++;
 			}
 
