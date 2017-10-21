@@ -72,10 +72,10 @@ class Model_Company extends Model_Base_Table{
 					$cmp['is_active'] = true;
 					$cmp->save();
 
-					$company_list[$data['ISIN_CODE']] = $cmp->get();
+					$company_list[$data['ISIN_CODE']] = $cmp->id;
 				}
 
-				$company_id = $company_list[$data['ISIN_CODE']]['id'];
+				$company_id = $company_list[$data['ISIN_CODE']];
 
 				$insert_query .= "('".$company_id."','".$data['OPEN']."','".$data['HIGH']."','".$data['LOW']."','".$data['CLOSE']."','".$data['LAST']."','".$data['PREVCLOSE']."','".date('Y-m-d', strtotime($data['TRADING_DATE']))."','".date('Y-m-d', strtotime($data['TRADING_DATE']))."','".$import_date."'),";
 			}
