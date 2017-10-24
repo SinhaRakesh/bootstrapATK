@@ -36,9 +36,6 @@ class Model_Company extends Model_Base_Table{
 			return $q->expr('[0]',[$db->fieldQuery('created_at')]);
 		});
 
-		
-
-
 		// $this->add('dynamic_model/Controller_AutoCreator');
 	}
 
@@ -48,7 +45,7 @@ class Model_Company extends Model_Base_Table{
 		$company = $this->add('Model_Company')->getRows();
 		$company_list = [];
 		foreach ($company as $m) {
-			$company_list[$m['isin_code']] = $m['id'];
+			$company_list[$m['sc_name']] = $m['id'];
 		}
 
 		if(!$import_date)
@@ -61,28 +58,29 @@ class Model_Company extends Model_Base_Table{
 			// record
 			foreach ($record as $data) {
 				// if isin number is not in company list
-				if(!isset($company_list[$data['ISIN_CODE']])){
+				$sc_name = trim($data['SC_NAME']);
+				if(!isset($company_list[$sc_name])){
 					$cmp = $this->add('Model_Company');
-					$cmp->addCondition('isin_code',$data['ISIN_CODE']);
-					$cmp['sc_name'] = $data['SC_NAME'];
-					$cmp['sc_code'] = $data['SC_CODE'];
-					$cmp['sc_group'] = $data['SC_GROUP'];
-					$cmp['sc_type'] = $data['SC_TYPE'];
-					// $cmp['isin_code'] = $data['ISIN_CODE'];
+					$cmp->addCondition('sc_name',$sc_name);
+					$cmp->tryLoadAny();
+					// $cmp['sc_name'] = $data['SC_NAME'];
+					$cmp['sc_code'] = trim($data['SC_CODE']);
+					$cmp['sc_group'] = trim($data['SC_GROUP']);
+					$cmp['sc_type'] = trim($data['SC_TYPE']);
+					$cmp['isin_code'] = trim($data['ISIN_CODE']);
 					$cmp['is_active'] = true;
 					$cmp->save();
 
-					$company_list[$data['ISIN_CODE']] = $cmp->id;
+					$company_list[$sc_name] = $cmp->id;
 				}
 
-				$company_id = $company_list[$data['ISIN_CODE']];
+				$company_id = $company_list[$sc_name];
 
 				$insert_query .= "('".$company_id."','".$data['OPEN']."','".$data['HIGH']."','".$data['LOW']."','".$data['CLOSE']."','".$data['LAST']."','".$data['PREVCLOSE']."','".date('Y-m-d', strtotime($data['TRADING_DATE']))."','".date('Y-m-d', strtotime($data['TRADING_DATE']))."','".$import_date."'),";
 			}
 			$insert_query = trim($insert_query,',');
 
 			$this->app->db->dsql()->expr($insert_query)->execute();
-
 			$this->api->db->commit();
 		}catch(\Exception $e){
 			$this->api->db->rollback();
