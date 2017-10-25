@@ -62,6 +62,7 @@ class Model_Client extends Model_Base_Table{
 		$company_list = [];
 		foreach ($company as $m) {
 			$company_list[$m['isin_code']] = $m;
+			$company_list[$m['sc_name']] = $m;
 		}
 
 		$client = $this->add('Model_Client')->getRows();
@@ -79,10 +80,11 @@ class Model_Client extends Model_Base_Table{
 
 			$insert_query = "INSERT into transaction (client_id,company_id,sheet_user_id,account_id,exchg_seg,instrument_name,buy_value,sell_value,net_value,buy_avg_price,sell_avg_price,bep,mark_to_market,trading_symbol,client_status,indicator,sell_qty,buy_qty,net_qty,created_at,import_date) VALUES ";
 			foreach ($record as $data) {
-				$account_id = trim($data['Account Id']);
+				$account_id = trim($data['ACCOUNT ID']);
+				$symbol = trim($data['SYMBOL']);
 
-				if(!isset($company_list[$data['Symbol']])){
-					$company_not_found[$data['Symbol']] = $data;
+				if(!isset($company_list[$symbol])){
+					$company_not_found[$symbol] = $data;
 					continue;
 				}
 
@@ -93,20 +95,20 @@ class Model_Client extends Model_Base_Table{
 
 				$client_id = $client_list[$account_id]['id'];
 				$client_name = $client_list[$account_id]['name'];
-				$company_id = $company_list[$data['Symbol']]['id'];
+				$company_id = $company_list[$symbol]['id'];
 
 				$buy_avg_price = 0;
-				if(is_numeric($data['BuyAvgPrice']))
-					$buy_avg_price = $data['BuyAvgPrice'];
+				if(is_numeric($data['BUY AVG PRICE']))
+					$buy_avg_price = $data['BUY AVG PRICE'];
 
 				$sell_avg_price = 0;
-				if(is_numeric($data['SellAvgPrice']))
-					$sell_avg_price = $data['SellAvgPrice'];
+				if(is_numeric($data['SELL AVG PRICE']))
+					$sell_avg_price = $data['SELL AVG PRICE'];
 
-				$net_value = $data['SellValue'] - $data['BuyValue'];
-				$net_qty = (is_numeric($data['BuyQty'])?:0) - (is_numeric($data['SellQty'])?:0);
+				$net_value = $data['SELL VALUE'] - $data['BUY VALUE'];
+				$net_qty = (is_numeric($data['BUY QTY'])?:0) - (is_numeric($data['SELL QTY'])?:0);
 
-				$insert_query .= "('".$client_id."','".$company_id."','".$data['UserId']."','".$data['Account Id']."','".$data['Exchg.Seg']."','".$data['Instrument Name']."','".$data['BuyValue']."','".$data['SellValue']."','".$net_value."','".$buy_avg_price."','".$sell_avg_price."','".$data['BEP']."','".$data['MarkToMarket']."','".$data['Trading Symbol']."','".$data['Client Status']."','".$data['Indicator']."','".$data['SellQty']."','".$data['BuyQty']."','".$net_qty."','".$this->app->now."','".$import_date."'),";
+				$insert_query .= "('".$client_id."','".$company_id."','".$data['USER ID']."','".$data['ACCOUNT ID']."','".$data['EXCHG SEG']."','".$data['INSTRUMENT NAME']."','".$data['BUY VALUE']."','".$data['SELL VALUE']."','".$net_value."','".$buy_avg_price."','".$sell_avg_price."','".$data['BEP']."','".$data['MARK TO MARKET']."','".$data['TRADING SYMBOL']."','".$data['CLIENT STATUS']."','".$data['INDICATOR']."','".$data['SELL QTY']."','".$data['BUY QTY']."','".$net_qty."','".$this->app->now."','".$import_date."'),";
 				
 				$total_record_inserted++;
 			}
@@ -212,7 +214,8 @@ class Model_Client extends Model_Base_Table{
 		$company = $this->add('Model_Company')->getRows();
 		$company_list = [];
 		foreach ($company as $m) {
-			$company_list[$m['isin_code']] = $m;
+			$company_list[trim($m['isin_code'])] = $m;
+			$company_list[trim($m['sc_name'])] = $m;
 		}
 
 		$client = $this->add('Model_Client')->getRows();
@@ -225,6 +228,7 @@ class Model_Client extends Model_Base_Table{
 		$company_not_found = [];
 		$total_record_inserted = 0;
 
+		// default value for sell
 		$fields = ['transaction_master_id','client_id','company_id','created_at','sell_qty','sell_value','net_value','net_qty','sell_amount','import_date'];
 		if($type == "Buy"){
 			$fields = ['transaction_master_id','client_id','company_id','created_at','buy_qty','buy_value','net_value','net_qty','buy_amount','import_date'];
@@ -244,10 +248,10 @@ class Model_Client extends Model_Base_Table{
 			foreach ($record as $data) {
 
 				$client_code = trim($data['CLIENT ID']);
+				$symbol = trim($data['SYMBOL']);
 
-				if(!isset($company_list[$data['SYMBOL']])){
-					// echo "company not found ".$data['SYMBOL']."<br/>";
-					$company_not_found[$data['SYMBOL']] = $data;
+				if(!isset($company_list[$symbol])){
+					$company_not_found[$symbol] = $data;
 					continue;
 				}
 
@@ -259,11 +263,11 @@ class Model_Client extends Model_Base_Table{
 
 				$client_id = $client_list[$client_code]['id'];
 				$client_name = $client_list[$client_code]['name'];
-				$company_id = $company_list[$data['SYMBOL']]['id'];
+				$company_id = $company_list[$symbol]['id'];
 
 				if($type == "Buy"){
-					$net_qty = $qty = $data['QTY BUY'];
-					$net_value = $price = $data['BUY PRICE'];
+					$net_qty = $qty = trim($data['QTY BUY']);
+					$net_value = $price = trim($data['BUY PRICE']);
 					$created_at = date('Y-m-d',strtotime(str_replace("/","-",$data['DATE OF PURCHASE'])));
 				}else{
 					$qty = $data['QTY SOLD'];
