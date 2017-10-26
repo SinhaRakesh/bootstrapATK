@@ -19,6 +19,7 @@ class Model_Transaction extends Model_Base_Table{
 
 		$this->addField('exchg_seg');
 		$this->addField('instrument_name');
+		
 		$this->addField('buy_value')->type('money');
 		$this->addField('sell_value')->type('money');
 		$this->addField('net_value')->type('money');
@@ -39,10 +40,15 @@ class Model_Transaction extends Model_Base_Table{
 		$this->addField('created_at')->type('datetime')->set($this->app->now);
 		$this->addField('import_date')->type('datetime'); // import date in software system
 		
+		$this->addField('fifo_sell_qty')->type('Number')->defaultValue(0);
+		$this->addField('fifo_sell_price')->type('Number')->defaultValue(0);
+		$this->addField('fifo_sell_date')->type('datetime');
+
 		$this->addExpression('master_type')->set(function($m,$q){
 			return $q->expr('IFNULL([0],0)',[$m->refSQL('transaction_master_id')->fieldQuery('name')]);
 		});
-		
+
+		$this->addExpression('fifo_remaining_qty')->set('IFNULL(buy_qty,0) - IFNULL(fifo_sell_qty,0)');
 		// $this->addExpression('buy_amount')->set('IFNULL(buy_value,0) * IFNULL(buy_qty,0)');
 		// $this->addExpression('sell_amount')->set('IFNULL(sell_value,0) * IFNULL(sell_qty,0)');
 

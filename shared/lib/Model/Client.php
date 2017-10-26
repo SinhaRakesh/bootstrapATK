@@ -229,9 +229,9 @@ class Model_Client extends Model_Base_Table{
 		$total_record_inserted = 0;
 
 		// default value for sell
-		$fields = ['transaction_master_id','client_id','company_id','created_at','sell_qty','sell_value','net_value','net_qty','sell_amount','import_date'];
+		$fields = ['transaction_master_id','client_id','company_id','created_at','sell_qty','sell_value','net_value','net_qty','sell_amount','import_date','fifo_sell_qty','fifo_sell_price','fifo_sell_date'];
 		if($type == "Buy"){
-			$fields = ['transaction_master_id','client_id','company_id','created_at','buy_qty','buy_value','net_value','net_qty','buy_amount','import_date'];
+			$fields = ['transaction_master_id','client_id','company_id','created_at','buy_qty','buy_value','net_value','net_qty','buy_amount','import_date','fifo_sell_qty','fifo_sell_price','fifo_sell_date'];
 		}
 
 		try{
@@ -265,20 +265,30 @@ class Model_Client extends Model_Base_Table{
 				$client_name = $client_list[$client_code]['name'];
 				$company_id = $company_list[$symbol]['id'];
 
+				$fifo_sell_date = null;
 				if($type == "Buy"){
 					$net_qty = $qty = trim($data['QTY BUY']);
 					$net_value = $price = trim($data['BUY PRICE']);
 					$created_at = date('Y-m-d',strtotime(str_replace("/","-",$data['DATE OF PURCHASE'])));
+					$fifo_sell_qty = 0;
+					$fifo_sell_price = 0;
 				}else{
 					$qty = $data['QTY SOLD'];
 					$price = $data['SELLING PRICE'];
 					$net_qty = $qty *( -1);
 					$net_value = $price *( -1);
-
 					$created_at = date('Y-m-d',strtotime(str_replace("/","-",$data['DATE OF SELLING'])));
+					
+					// update fifo value
+					$fifo_sell_qty = $this->updateFIFO($qty,$price,$client_id,$company_id,$created_at);
+					$fifo_sell_price = 0;
+					if($fifo_sell_qty > 0){
+						$fifo_sell_price = $price;
+						$fifo_sell_date = $created_at;
+					}
 				}
 
-				$insert_query .= "('".$tm->id."','".$client_id."','".$company_id."','".$created_at."','".$qty."','".$price."','".$net_value."','".$net_qty."','".($qty * $price)."','".$import_date."'),";
+				$insert_query .= "('".$tm->id."','".$client_id."','".$company_id."','".$created_at."','".$qty."','".$price."','".$net_value."','".$net_qty."','".($qty * $price)."','".$import_date."','".$fifo_sell_qty."','".$fifo_sell_price."','".$fifo_sell_date."'),";
 				$total_record_inserted++;
 			}
 
@@ -291,6 +301,7 @@ class Model_Client extends Model_Base_Table{
 			$this->app->db->commit();
 		}catch(\Exception $e){
 			$this->app->db->rollback();
+			throw new \Exception($e->getMessage());
 			
 		}
 		
@@ -300,6 +311,48 @@ class Model_Client extends Model_Base_Table{
 				'total_client_not_found' => count($client_not_found),
 				'total_company_not_found' => count($company_not_found)
 			];
+	}
+
+
+	function updateFIFO($sell_qty,$sell_price,$client_id,$company_id,$date=null){
+
+		if(!$date) $date = $this->app->now;
+
+		$transaction = $this->add('Model_Transaction');
+		$transaction->addCondition('client_id',$client_id);
+		$transaction->addCondition('company_id',$company_id);
+		$transaction->addCondition('fifo_remaining_qty','>',0);
+		$transaction->setOrder('created_at','asc');
+
+		// throw new \Exception("Error Processing Request", 1);
+		foreach ($transaction as $tra) {
+			if(!$sell_qty) continue;
+
+			$tra_id = $tra->id;
+
+			$fill_qty = $tra['fifo_remaining_qty'];
+			if($fill_qty > $sell_qty){
+				$fill_qty = $sell_qty;
+				$sell_qty = 0;
+			}else{
+				$sell_qty = $sell_qty - $fill_qty;
+			}
+			$tra['fifo_sell_qty'] += $fill_qty;
+			$tra['fifo_sell_price'] = $sell_price;
+			$tra['fifo_sell_date'] = $date;
+			$tra->saveAndUnload();
+
+			$sell = $this->add('Model_FifoSell');
+			$sell['transaction_id'] = $tra_id;
+			$sell['sell_qty'] = $fill_qty;
+			$sell['sell_price'] = $sell_price;
+			$sell['sell_date'] = $date;
+			$sell->save();
+
+			// echo "buy_qty = ".$tra['buy_qty']." = "."<br/>";
+		}
+		return $sell_qty;
+
 	}
 
 }

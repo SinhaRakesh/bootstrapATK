@@ -18,43 +18,15 @@ class page_index extends Page {
         $grid = $this->add('Grid');
         $grid->setModel($m,['name','today_buying_value','today_sell_value','short_term_capital_gain','long_term_capital_gain']);
 
+        // $strtotime = strtotime($on_date);
+        // $fin_start_date = (date('m',$strtotime) < '04') ? date('Y-04-01',strtotime('-1 year',$strtotime)) : date('Y-04-01',$strtotime);
+        // $end_start_date = date('Y-03-t',strtotime('+1 year',strtotime($fin_start_date)));
+
+        // $grid->add('View',null,'grid_buttons')->set($fin_start_date." end= ".$end_start_date);
+
         if($form->isSubmitted()){
             $grid->js()->reload(['date'=>$form['date']])->execute();
         }
-
-        // $this->add('View_Box')
-        //     ->setHTML('Welcome to your new Web App Project. Get started by opening '.
-        //         '<b>admin/page/index.php</b> file in your text editor and '.
-        //         '<a href="http://book.agiletoolkit.org/" target="_blank">Reading '.
-        //         'the documentation</a>.');        
-
-        // $form = $this->add('Form');
-        // $form->addField('name');
-        // $form->addField('DatePicker','dob');
-        // $form->addSubmit('save');
-
-
-        // $fo = [
-        //     "autoOpen"=>false,
-        //     "modal" => true,
-        //     "width" => 500,
-        //     "title" => "Some title",
-        //     "hide"=> [
-        //             "effect"=> "scale",
-        //             "easing"=> "easeInBack",
-        //         ]
-        // ];
-
-        // $crud = $this->add('CRUD');
-        // $crud->setModel('Outbox');
-        // $crud->grid->addQuickSearch(['name']);
-
-        // $crud = $this->add('CRUD');
-        // $crud->setModel('DailyBhav');
-
-        // $crud = $this->add('CRUD');
-        // $crud->setModel('Client'); 
-
-        // $this->add('View_DashboardCount');
+        
     }
 }
