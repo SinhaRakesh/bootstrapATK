@@ -21,7 +21,7 @@ class Model_Company extends Model_Base_Table{
 		$this->addExpression('closing_value')->set(function($m,$q){
 			$db = $m->add('Model_DailyBhav');
 			$db->addCondition('company_id',$m->getElement('id'))
-				->setOrder('import_date','desc')
+				->setOrder('created_at','desc')
 				->setLimit(1)
 				;
 			return $q->expr('[0]',[$db->fieldQuery('last')]);
