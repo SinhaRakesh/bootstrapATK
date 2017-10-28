@@ -78,7 +78,8 @@ class Model_Client extends Model_Base_Table{
 		try{
 			$this->app->db->beginTransaction();
 
-			$insert_query = "INSERT into transaction (client_id,company_id,sheet_user_id,account_id,exchg_seg,instrument_name,buy_value,sell_value,net_value,buy_avg_price,sell_avg_price,bep,mark_to_market,trading_symbol,client_status,indicator,sell_qty,buy_qty,net_qty,created_at,import_date) VALUES ";
+
+			// $insert_query = "INSERT into transaction (client_id,company_id,sheet_user_id,account_id,exchg_seg,instrument_name,buy_value,sell_value,net_value,buy_avg_price,sell_avg_price,bep,mark_to_market,trading_symbol,client_status,indicator,sell_qty,buy_qty,net_qty,created_at,import_date) VALUES ";
 			foreach ($record as $data) {
 				$account_id = trim($data['ACCOUNT ID']);
 				$symbol = trim($data['SYMBOL']);
@@ -108,15 +109,40 @@ class Model_Client extends Model_Base_Table{
 				$net_value = $data['SELL VALUE'] - $data['BUY VALUE'];
 				$net_qty = (is_numeric($data['BUY QTY'])?:0) - (is_numeric($data['SELL QTY'])?:0);
 
-				$insert_query .= "('".$client_id."','".$company_id."','".$data['USER ID']."','".$data['ACCOUNT ID']."','".$data['EXCHG SEG']."','".$data['INSTRUMENT NAME']."','".$data['BUY VALUE']."','".$data['SELL VALUE']."','".$net_value."','".$buy_avg_price."','".$sell_avg_price."','".$data['BEP']."','".$data['MARK TO MARKET']."','".$data['TRADING SYMBOL']."','".$data['CLIENT STATUS']."','".$data['INDICATOR']."','".$data['SELL QTY']."','".$data['BUY QTY']."','".$net_qty."','".$this->app->now."','".$import_date."'),";
+				$tra = $this->add('Model_Transaction');
+				$tra['client_id'] = $client_id;
+				$tra['company_id'] = $company_id;
+				$tra['sheet_user_id'] = $data['USER ID'];
+				$tra['account_id'] = $data['ACCOUNT ID'];
+				$tra['exchg_seg'] = $data['EXCHG SEG'];
+				$tra['instrument_name'] = $data['INSTRUMENT NAME'];
+				$tra['buy_value'] = $data['BUY VALUE'];
+				$tra['sell_value'] = $data['SELL VALUE'];
+				$tra['net_value'] = $net_value;
+				$tra['buy_avg_price'] = $buy_avg_price;
+				$tra['sell_avg_price'] = $sell_avg_price;
+				$tra['bep'] = $data['BEP'];
+				$tra['mark_to_market'] = $data['MARK TO MARKET'];
+				$tra['trading_symbol'] = $data['TRADING SYMBOL'];
+				$tra['client_status'] = $data['CLIENT STATUS'];
+				$tra['indicator'] = $data['INDICATOR'];
+				$tra['sell_qty'] = $data['SELL QTY'];
+				$tra['buy_qty'] = $data['BUY QTY'];
+				$tra['net_qty'] = $net_qty;
+				$tra['created_at'] = $this->app->now;
+				$tra['import_date'] = $import_date;
+				$tra->save();
+
+				$this->updateFIFO($data['SELL QTY'],$data['SELL VALUE'],$client_id,$company_id,$date=null);
+				// $insert_query .= "('".$client_id."','".$company_id."','".$data['USER ID']."','".$data['ACCOUNT ID']."','".$data['EXCHG SEG']."','".$data['INSTRUMENT NAME']."','".$data['BUY VALUE']."','".$data['SELL VALUE']."','".$net_value."','".$buy_avg_price."','".$sell_avg_price."','".$data['BEP']."','".$data['MARK TO MARKET']."','".$data['TRADING SYMBOL']."','".$data['CLIENT STATUS']."','".$data['INDICATOR']."','".$data['SELL QTY']."','".$data['BUY QTY']."','".$net_qty."','".$this->app->now."','".$import_date."'),";
 				
 				$total_record_inserted++;
 			}
 
-			if($total_record_inserted){
-				$insert_query = trim($insert_query,',');
-				$this->app->db->dsql()->expr($insert_query)->execute();
-			}
+			// if($total_record_inserted){
+			// 	$insert_query = trim($insert_query,',');
+			// 	$this->app->db->dsql()->expr($insert_query)->execute();
+			// }
 
 			$this->app->db->commit();
 		}catch(\Exception $e){
