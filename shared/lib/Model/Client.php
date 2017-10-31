@@ -11,7 +11,7 @@ class Model_Client extends Model_Base_Table{
 		
 		$this->addField('name');
 		$this->addField('client_code')->caption('Client ID');
-		$this->addField('phone_number')->type('number');
+		$this->addField('phone_number');
 		$this->addField('email_id');
 		$this->addField('address1');
 		$this->addField('address2');
@@ -205,7 +205,7 @@ class Model_Client extends Model_Base_Table{
 				if(isset($state_list[strtolower(trim($data['State']))]))
 					$state_id = $state_list[strtolower(trim($data['State']))];
 
-				$insert_query .= "('".$client_code."','".$data['Client Name']."','".$data['Email Address']."','".$data['Phone number']."','".$data['Address1']."','".$data['Address2']."','".$city_id."','".$state_id."','".$data['pin_code']."',1,'".$this->app->now."'),";
+				$insert_query .= "('".$client_code."','".$data['Client Name']."','".$data['Email Address']."','".$data['Phone Number']."','".$data['Address1']."','".$data['Address2']."','".$city_id."','".$state_id."','".$data['Pincode']."',1,'".$this->app->now."'),";
 				
 				$total_record_inserted++;
 				$client_list[$data['Client Code']] = [

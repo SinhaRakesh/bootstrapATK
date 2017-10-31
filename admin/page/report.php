@@ -11,9 +11,9 @@ class page_report extends Page {
         $c_id = $this->app->stickyGET('client');
 
         $form = $this->add('Form');
-        $fld_client = $form->addField('DropDown','client');
+        $fld_client = $form->addField('autocomplete/Basic','client');
         $fld_client->setModel('Client');
-        $fld_client->setEmptyText('All');
+        // $fld_client->setEmptyText('All');
         $fld_client->set($c_id);
 
         $fld_type = $form->addField('DropDown','report_type');
@@ -47,7 +47,7 @@ class page_report extends Page {
 
         if($form->isSubmitted()){
             if($form['report_type'] == "stock_report" && !$form['client']) $form->error('client','must not be empty');
-
+            
             $this->js()->reload(['client'=>$form['client'],'type'=>$form['report_type']])->execute();
         }
     }
@@ -59,7 +59,7 @@ class page_report extends Page {
 
         $model->addExpression('cmp')->set(function($m,$q){
             $c = $m->add('Model_DailyBhav')
-                ->addCondition('company_id',$m->getElement('id'))
+                ->addCondition('company_id',$m->getElement('company_id'))
                 ->setOrder('created_at','desc')
                 ->setLimit(1)
                 ;
@@ -68,7 +68,7 @@ class page_report extends Page {
 
         $model->addExpression('cmp_amount')->set(function($m,$q){
             return $q->expr('(Abs([0]) * Abs([1]))',[$m->getElement('fifo_remaining_qty'),$m->getElement('cmp')]);
-        });
+        })->type('money');
 
         $model->addExpression('fifo_remaining_amount')->set(function($m,$q){
             return $q->expr('(Abs([0]) * Abs([1]))',[$m->getElement('fifo_remaining_qty'),$m->getElement('buy_value')]);
@@ -83,20 +83,89 @@ class page_report extends Page {
             return $q->expr('(Abs([0])/Abs([1]))*100',[$m->getElement('pl'),$m->getElement('fifo_remaining_amount')]);
         })->type('money');
 
-        $model->addCondition('fifo_remaining_qty','>',0);
+        $model->addCondition('fifo_remaining_qty','<>',0);
         $model->addCondition('client_id',$client_id);
         
         $grid = $this->add('Grid');
-        $grid->setModel($model,['date','company','buy_qty','buy_amount','fifo_remaining_qty','buy_value','fifo_remaining_amount','cmp','cmp_amount','pl','gain']);
-
+        $grid->setModel($model,['date','company','buy_qty','buy_value','fifo_remaining_qty','fifo_remaining_amount','cmp','cmp_amount','pl','gain']);
+        $grid->add('misc/Export');
+        $grid->addPaginator($ipp=30);
     }
 
     function addLongTermReport($client_id){
-        $this->add('View')->set($client_id);
+        $on_date = $this->app->stickyGET('date');
+        if(!$on_date) $on_date = $this->app->today;
+
+        $strtotime = strtotime($on_date);
+        $fin_start_date = (date('m',$strtotime) < '04') ? date('Y-04-01',strtotime('-1 year',$strtotime)) : date('Y-04-01',$strtotime);
+        $fin_end_date = date('Y-03-t',strtotime('+1 year',strtotime($fin_start_date)));
+
+        if($client_id){
+            $tra = $this->add('Model_Transaction');
+            $tra->addExpression('total_sell_amount')->set('IFNULL(sum(sell_amount),0)')->type('money');
+            $tra->addExpression('total_buy_amount')->set('IFNULL(sum(buy_amount),0)')->type('money');
+
+            $tra->addExpression('LTCP')->set(function($m,$q){
+                return $q->expr('IFNULL(([total_sell_amount]/[total_buy_amount])*100,0)',
+                    [
+                    'total_sell_amount'=>$m->getElement('total_sell_amount'),
+                    'total_buy_amount'=>$m->getElement('total_buy_amount')
+                ]);
+            })->type('money');
+
+            $tra->addCondition('client_id',$client_id);
+            $tra->addCondition('created_at','<',$fin_start_date);
+            $tra->_dsql()->group('company_id'); 
+
+            $grid = $this->add('Grid');
+            $grid->setModel($tra,['client','company','total_buy_amount','total_sell_amount','LTCP']);
+            $grid->addPaginator($ipp=50);
+        }else{
+            $m = $this->add('Model_ClientData',['on_date'=>$on_date]);
+            $grid = $this->add('Grid');
+            $grid->setModel($m,['name','long_term_capital_gain']);
+        }
+
     }
 
     function addShortTermReport($client_id){
-        $this->add('View')->set($client_id);
+        $on_date = $this->app->stickyGET('date');
+        if(!$on_date) $on_date = $this->app->today;
+
+        $strtotime = strtotime($on_date);
+        $fin_start_date = (date('m',$strtotime) < '04') ? date('Y-04-01',strtotime('-1 year',$strtotime)) : date('Y-04-01',$strtotime);
+        $fin_end_date = date('Y-03-t',strtotime('+1 year',strtotime($fin_start_date)));
+
+        if($client_id){
+            $tra = $this->add('Model_Transaction');
+            $tra->addExpression('total_sell_amount')->set('IFNULL(sum(sell_amount),0)');
+            $tra->addExpression('total_buy_amount')->set('IFNULL(sum(buy_amount),0)');
+
+            $tra->addExpression('STCP')->set(function($m,$q){
+                return $q->expr('IFNULL(([total_sell_amount]/[total_buy_amount])*100,0)',
+                    [
+                    'total_sell_amount'=>$m->getElement('total_sell_amount'),
+                    'total_buy_amount'=>$m->getElement('total_buy_amount')
+                ]);
+            })->type('money');
+
+            $tra->addCondition('client_id',$client_id);
+            $tra->addCondition('created_at','>=',$fin_start_date);
+            $tra->addCondition('created_at','<',$this->app->nextDate($fin_end_date));
+            $tra->_dsql()->group('company_id'); 
+
+            $grid = $this->add('Grid');
+            $grid->setModel($tra,['client','company','total_buy_amount','total_sell_amount','STCP']);
+            $grid->addPaginator($ipp=50);
+        }else{
+            $m = $this->add('Model_ClientData',['on_date'=>$on_date]);
+            // if($client_id)
+            //     $m->addCondition('id',$client_id);
+            $grid = $this->add('Grid');
+            $grid->setModel($m,['name','short_term_capital_gain']);
+        }
+
+
     }
 
 }

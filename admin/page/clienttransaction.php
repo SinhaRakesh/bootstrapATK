@@ -11,6 +11,7 @@ class page_clienttransaction extends Page {
         $tra = $tab->addTab('Transaction');
         $fifo = $tab->addTab('FIFO');
         $sell = $tab->addTab('sell');
+        $all = $tab->addTab('All Transaction');
 
         $crud = $tra->add('CRUD',['allow_add'=>false]);
         $crud->setModel('Model_TransactionMaster')->setOrder('id','desc');
@@ -35,7 +36,7 @@ class page_clienttransaction extends Page {
         $grid = $fifo->add('Grid');
         $grid->setModel($model,['client','company','isin','created_at','buy_qty','fifo_sell_qty','fifo_remaining_qty','fifo_sell_date','sell_qty']);
         $grid->addPaginator($ipp=50);
-        $grid->addQuickSearch(['company']);
+        $grid->addQuickSearch(['company','client','isin']);
 
         $model = $this->add('Model_Transaction');
         $model->addExpression('isin')->set($model->refSQL('company_id')->fieldQuery('isin_code'));
@@ -46,7 +47,41 @@ class page_clienttransaction extends Page {
         $grid = $sell->add('Grid');
         $grid->setModel($model,['client','company','isin','created_at','sell_qty']);
         $grid->addPaginator($ipp=50);
-        $grid->addQuickSearch(['company']);
+        $grid->addQuickSearch(['company','client','isin']);
+
+        $form = $all->add('Form');
+        $form->addField('autocomplete/Basic','client')->setModel('Client');
+        $form->addField('autocomplete/Basic','company')->setModel('Company');
+        $form->addField('DatePicker','from_date');
+        $form->addField('DatePicker','to_date');
+        $form->addSubmit('filter');
+
+        $tras = $this->add('Model_Transaction');
+        $tras->addCondition('client_id',$_GET['a_client_id']);
+
+        if($_GET['a_company_id'] > 0)
+            $tras->addCondition('company_id',$_GET['a_company_id']);
+
+        if(strtotime($_GET['a_from_date']) > 0){
+            $tras->addCondition('created_at','>=',$_GET['a_from_date']);
+        }
+        if(strtotime($_GET['a_to_date']) > 0){
+            $tras->addCondition('created_at','<',$this->app->nextDate($_GET['a_to_date']));
+        }
+        $tras->setOrder('created_at','desc');
+
+        $a_grid = $all->add('Grid');
+        $a_grid->setModel($tras,['company','created_at','buy_qty','buy_value','sell_qty','sell_value','net_value','net_aty','buy_amount','sell_amount']);
+        $a_grid->addTotals(['buy_amount','sell_amount','buy_qty','sell_qty']);
+
+        if($form->isSubmitted()){
+            $a_grid->js()->reload([
+                        'a_client_id'=>$form['client'],
+                        'a_company_id'=>$form['company'],
+                        'a_from_date'=>$form['from_date'],
+                        'a_to_date'=>$form['to_date'],
+                    ])->execute();
+        }
 
     }
 }
