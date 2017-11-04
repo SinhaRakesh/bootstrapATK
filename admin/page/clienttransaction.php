@@ -34,7 +34,7 @@ class page_clienttransaction extends Page {
         $model->addCondition('buy_qty','>',0);
 
         $grid = $fifo->add('Grid');
-        $grid->setModel($model,['client','company','isin','created_at','buy_qty','fifo_sell_qty','fifo_remaining_qty','fifo_sell_date','sell_qty']);
+        $grid->setModel($model,['client','company','isin','created_at','buy_qty','fifo_sell_qty','fifo_remaining_qty','fifo_sell_date','sell_duration','sell_qty']);
         $grid->addPaginator($ipp=50);
         $grid->addQuickSearch(['company','client','isin']);
 

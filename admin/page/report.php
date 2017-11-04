@@ -56,6 +56,10 @@ class page_report extends Page {
     function addStockReport($client_id){
         $model = $this->add('Model_Transaction');
         $model->addExpression('date')->set('Date_Format(created_at,"%d %M %Y")');
+        
+        $model->addExpression('fifo_remaining_amount')->set(function($m,$q){
+            return $q->expr('([0] * [1])',[$m->getElement('fifo_remaining_qty'),$m->getElement('buy_value')]);
+        })->type('money');
 
         $model->addExpression('cmp')->set(function($m,$q){
             $c = $m->add('Model_DailyBhav')
@@ -67,29 +71,31 @@ class page_report extends Page {
         })->type('money');
 
         $model->addExpression('cmp_amount')->set(function($m,$q){
-            return $q->expr('(Abs([0]) * Abs([1]))',[$m->getElement('fifo_remaining_qty'),$m->getElement('cmp')]);
+            return $q->expr('([0] * [1])',[$m->getElement('fifo_remaining_qty'),$m->getElement('cmp')]);
         })->type('money');
-
-        $model->addExpression('fifo_remaining_amount')->set(function($m,$q){
-            return $q->expr('(Abs([0]) * Abs([1]))',[$m->getElement('fifo_remaining_qty'),$m->getElement('buy_value')]);
-        })->type('money');
-
 
         $model->addExpression('pl')->set(function($m,$q){
-            return $q->expr('[0]-[1]',[$m->getElement('cmp_amount'),$m->getElement('fifo_remaining_amount')]);
+            return $q->expr('([0]-[1])',[$m->getElement('cmp_amount'),$m->getElement('fifo_remaining_amount')]);
         })->type('money')->caption('P/L');
 
         $model->addExpression('gain')->set(function($m,$q){
-            return $q->expr('(Abs([0])/Abs([1]))*100',[$m->getElement('pl'),$m->getElement('fifo_remaining_amount')]);
+            return $q->expr('(([0]/[1])*100)',[$m->getElement('pl'),$m->getElement('fifo_remaining_amount')]);
         })->type('money');
 
-        $model->addCondition('fifo_remaining_qty','<>',0);
+        $model->addCondition('fifo_remaining_qty','>',0);
         $model->addCondition('client_id',$client_id);
         
         $grid = $this->add('Grid');
-        $grid->setModel($model,['date','company','buy_qty','buy_value','fifo_remaining_qty','fifo_remaining_amount','cmp','cmp_amount','pl','gain']);
+        $grid->setModel($model,['date','company','buy_qty','buy_value','buy_amount','fifo_remaining_qty','fifo_remaining_amount','cmp','cmp_amount','pl','gain']);
         $grid->add('misc/Export');
         $grid->addPaginator($ipp=30);
+
+        $grid->addHook('formatRow',function($g){
+            if($g->model['pl'] < 0 ){
+                $g->current_row_html['pl'] = abs($g->model['pl']);
+                $g->current_row_html['gain'] = round(abs($g->model['gain']),2);
+            }
+        });
     }
 
     function addLongTermReport($client_id){
@@ -101,25 +107,27 @@ class page_report extends Page {
         $fin_end_date = date('Y-03-t',strtotime('+1 year',strtotime($fin_start_date)));
 
         if($client_id){
-            $tra = $this->add('Model_Transaction');
-            $tra->addExpression('total_sell_amount')->set('IFNULL(sum(sell_amount),0)')->type('money');
-            $tra->addExpression('total_buy_amount')->set('IFNULL(sum(buy_amount),0)')->type('money');
-
+            $tra = $this->add('Model_FifoSell');
+            $tra->addExpression('total_sell_amount')->set('sum(sell_price * sell_qty)')->type('money');
+            $tra->addExpression('total_buy_amount')->set('sum(buy_price * sell_qty)')->type('money');
             $tra->addExpression('LTCP')->set(function($m,$q){
                 return $q->expr('IFNULL(([total_sell_amount]/[total_buy_amount])*100,0)',
-                    [
-                    'total_sell_amount'=>$m->getElement('total_sell_amount'),
-                    'total_buy_amount'=>$m->getElement('total_buy_amount')
-                ]);
+                        [
+                        'total_sell_amount'=>$m->getElement('total_sell_amount'),
+                        'total_buy_amount'=>$m->getElement('total_buy_amount')
+                    ]);
             })->type('money');
-
-            $tra->addCondition('client_id',$client_id);
-            $tra->addCondition('created_at','<',$fin_start_date);
-            $tra->_dsql()->group('company_id'); 
+            $tra->addCondition('client_id',$client_id)
+                ->addCondition('sell_date','<',$fin_start_date)
+                // ->addCondition('sell_date','<',$this->app->nextDate($fin_end_date))
+                // ->addCondition('sell_duration','<',365)
+                ;
+            $tra->_dsql()->group('company_id');
 
             $grid = $this->add('Grid');
-            $grid->setModel($tra,['client','company','total_buy_amount','total_sell_amount','LTCP']);
+            $grid->setModel($tra,['client','company','total_sell_amount','total_buy_amount','LTCP']);
             $grid->addPaginator($ipp=50);
+            $grid->add('misc/Export');
         }else{
             $m = $this->add('Model_ClientData',['on_date'=>$on_date]);
             $grid = $this->add('Grid');
@@ -137,26 +145,45 @@ class page_report extends Page {
         $fin_end_date = date('Y-03-t',strtotime('+1 year',strtotime($fin_start_date)));
 
         if($client_id){
-            $tra = $this->add('Model_Transaction');
-            $tra->addExpression('total_sell_amount')->set('IFNULL(sum(sell_amount),0)');
-            $tra->addExpression('total_buy_amount')->set('IFNULL(sum(buy_amount),0)');
 
+            // $tra = $this->add('Model_Transaction');
+            // $tra->addExpression('total_sell_amount')->set('IFNULL(sum(sell_amount),0)');
+            // $tra->addExpression('total_buy_amount')->set('IFNULL(sum(buy_amount),0)');
+
+            // $tra->addExpression('STCP')->set(function($m,$q){
+            //     return $q->expr('IFNULL(([total_sell_amount]/[total_buy_amount])*100,0)',
+            //         [
+            //         'total_sell_amount'=>$m->getElement('total_sell_amount'),
+            //         'total_buy_amount'=>$m->getElement('total_buy_amount')
+            //     ]);
+            // })->type('money');
+
+            // $tra->addCondition('client_id',$client_id);
+            // $tra->addCondition('created_at','>=',$fin_start_date);
+            // $tra->addCondition('created_at','<',$this->app->nextDate($fin_end_date));
+            // $tra->_dsql()->group('company_id');
+
+            $tra = $this->add('Model_FifoSell');
+            $tra->addExpression('total_sell_amount')->set('sum(sell_price * sell_qty)')->type('money');
+            $tra->addExpression('total_buy_amount')->set('sum(buy_price * sell_qty)')->type('money');
             $tra->addExpression('STCP')->set(function($m,$q){
                 return $q->expr('IFNULL(([total_sell_amount]/[total_buy_amount])*100,0)',
-                    [
-                    'total_sell_amount'=>$m->getElement('total_sell_amount'),
-                    'total_buy_amount'=>$m->getElement('total_buy_amount')
-                ]);
+                        [
+                        'total_sell_amount'=>$m->getElement('total_sell_amount'),
+                        'total_buy_amount'=>$m->getElement('total_buy_amount')
+                    ]);
             })->type('money');
-
-            $tra->addCondition('client_id',$client_id);
-            $tra->addCondition('created_at','>=',$fin_start_date);
-            $tra->addCondition('created_at','<',$this->app->nextDate($fin_end_date));
-            $tra->_dsql()->group('company_id'); 
+            $tra->addCondition('client_id',$client_id)
+                ->addCondition('sell_date','>=',$fin_start_date)
+                ->addCondition('sell_date','<',$this->app->nextDate($fin_end_date))
+                ->addCondition('sell_duration','<',365)
+                ;
+            $tra->_dsql()->group('company_id');
 
             $grid = $this->add('Grid');
-            $grid->setModel($tra,['client','company','total_buy_amount','total_sell_amount','STCP']);
+            $grid->setModel($tra,['client','company','total_sell_amount','total_buy_amount','STCP']);
             $grid->addPaginator($ipp=50);
+            $grid->add('misc/Export');
         }else{
             $m = $this->add('Model_ClientData',['on_date'=>$on_date]);
             // if($client_id)

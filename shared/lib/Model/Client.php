@@ -369,10 +369,13 @@ class Model_Client extends Model_Base_Table{
 			$tra->saveAndUnload();
 
 			$sell = $this->add('Model_FifoSell');
+			$sell['client_id'] = $client_id;
+			$sell['company_id'] = $company_id;
 			$sell['transaction_id'] = $tra_id;
 			$sell['sell_qty'] = $fill_qty;
 			$sell['sell_price'] = $sell_price;
 			$sell['sell_date'] = $date;
+			$sell['buy_price'] = $transaction['buy_value'];
 			$sell->save();
 
 			// echo "buy_qty = ".$tra['buy_qty']." = "."<br/>";

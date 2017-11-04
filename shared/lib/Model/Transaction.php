@@ -49,7 +49,11 @@ class Model_Transaction extends Model_Base_Table{
 		});
 
 		$this->addExpression('fifo_remaining_qty')->set(function($m,$q){
-			return $q->expr('IFNULL([0],0) - IFNULL([1],0)',[$m->getElement('buy_qty'),$m->getElement('fifo_sell_qty')]);
+			return $q->expr('(IFNULL([0],0) - IFNULL([1],0))',[$m->getElement('buy_qty'),$m->getElement('fifo_sell_qty')]);
+		})->type('number');
+
+		$this->addExpression('fifo_sell_amount')->set(function($m,$q){
+			return $q->expr('IFNULL([0],0) * IFNULL([1],0)',[$m->getElement('fifo_sell_qty'),$m->getElement('fifo_sell_price')]);
 		});
 		// $this->addExpression('fifo_remaining_qty')->set('IFNULL(buy_qty,0) - IFNULL(fifo_sell_qty,0)')->type('Number');
 		// $this->addExpression('buy_amount')->set('IFNULL(buy_value,0) * IFNULL(buy_qty,0)');

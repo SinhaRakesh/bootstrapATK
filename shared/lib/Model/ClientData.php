@@ -44,18 +44,31 @@ class Model_ClientData extends Model_Client{
 
 
 		$this->addExpression('short_term_capital_gain')->set(function($m,$q){
-			$tra = $m->add('Model_Transaction',['table_alias'=>'stcg']);
+			$tra = $m->add('Model_FifoSell',['table_alias'=>'stcg']);
 			$tra->addCondition('client_id',$m->getElement('id'))
-				->addCondition('created_at','>=',$this->fin_start_date)
-				->addCondition('created_at','<',$this->app->nextDate($this->fin_end_date))
+				->addCondition('sell_date','>=',$this->fin_start_date)
+				->addCondition('sell_date','<',$this->app->nextDate($this->fin_end_date))
+				->addCondition('sell_duration','<',365)
 				;
 			return $q->expr('IFNULL(([total_sell_amount]/[total_buy_amount])*100,0)',
 					[
-					'total_sell_amount'=>$tra->sum('sell_amount'),
-					'total_buy_amount'=>$tra->sum('buy_amount')
+					'total_sell_amount'=>$tra->sum('fifo_sell_amount'),
+					'total_buy_amount'=>$tra->sum('fifo_buy_amount')
 				]);
 		})->type('money');
 		
+		$this->addExpression('long_term_capital_gain')->set(function($m,$q){
+			$tra = $m->add('Model_FifoSell',['table_alias'=>'ltcg']);
+			$tra->addCondition('client_id',$m->getElement('id'))
+				->addCondition('sell_date','<',$this->fin_start_date)
+				;
+			
+			return $q->expr('IFNULL(([total_sell_amount]/[total_buy_amount])*100,0)',
+					[
+					'total_sell_amount'=>$tra->sum('fifo_sell_amount'),
+					'total_buy_amount'=>$tra->sum('fifo_buy_amount')
+				]);
+		})->type('money');
 
 		// $this->addExpression('short_total_sell_amount')->set(function($m,$q){
 		// 	$tra = $m->add('Model_Transaction',['table_alias'=>'tltcgs']);
@@ -85,18 +98,6 @@ class Model_ClientData extends Model_Client{
 		// 	return $q->expr('[0]',[$tra->sum('buy_amount')]);
 		// });
 
-		$this->addExpression('long_term_capital_gain')->set(function($m,$q){
-			$tra = $m->add('Model_Transaction',['table_alias'=>'ltcg']);
-			$tra->addCondition('client_id',$m->getElement('id'))
-				->addCondition('created_at','<',$this->fin_start_date)
-				;
-			
-			return $q->expr('IFNULL(([total_sell_amount]/[total_buy_amount])*100,0)',
-					[
-					'total_sell_amount'=>$tra->sum('sell_amount'),
-					'total_buy_amount'=>$tra->sum('buy_amount')
-				]);
-		})->type('money');
 
 	}
 }
