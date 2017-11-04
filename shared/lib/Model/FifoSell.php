@@ -34,7 +34,10 @@ class Model_FifoSell extends Model_Base_Table{
 
 		$this->addExpression('sell_duration')->set(function($m,$q){
 			return $q->expr('DATEDIFF([0],[1])',[$m->getElement('sell_date'),$m->getElement('tran_date')]);
-		});
+		})->type('number');
+
+		$this->addExpression('sell_amount')->set('(sell_price * sell_qty)')->type('money');
+        $this->addExpression('buy_amount')->set('(buy_price * sell_qty)')->type('money');
 
 		$this->add('dynamic_model/Controller_AutoCreator');
 	}
