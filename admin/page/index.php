@@ -17,23 +17,35 @@ class page_index extends Page {
         $form->addSubmit('filter');
 
         $m = $this->add('Model_ClientData',['on_date'=>$on_date]);
+
+        $m->addCondition('buy_value','>',0);
+        $m->getElement('today_buying_value')->caption('Buying Value on ('.date('d-M-Y',strtotime($on_date)).')');
+        $m->getElement('today_sell_value')->caption('Sell Value on ('.date('d-M-Y',strtotime($on_date)).')');
+
         $grid = $this->add('Grid');
-        $grid->setModel($m,['name','today_buying_value','today_sell_value']);
+        $grid->setModel($m,['name','today_buying_value','today_sell_value','buy_value','buy_current_value','net_investment','buy_current_value','profit','ror']);
         $grid->addPaginator($ipp=50);
         $grid->addQuickSearch(['name']);
+        $grid->addHook('formatRow',function($g){
+            $g->current_row_html['profit'] = round(abs($g->model['profit']),2);
+            $g->current_row_html['ror'] = round(abs($g->model['ror']),2);
+        });
         // $grid->addSno();
 
         $grid->add('VirtualPage')
-        ->addColumn('detail')
+        ->addColumn('detail','Transaction',['title'=>'Transaction'])
         ->set(function($page){
             $id = $_GET[$page->short_name.'_id'];
+
             $m = $page->add('Model_Transaction',['table_alias'=>'dt'])
                 ->addCondition('client_id',$id)
-                ->addCondition('created_at','>=',$this->on_date)
-                ->addCondition('created_at','<',$this->app->nextDate($this->on_date))
+                // ->addCondition('created_at','>=',$this->on_date)
+                ->addCondition('created_at','<=',$this->on_date)
+                ->addCondition('fifo_remaining_qty','>',0)
                 ;
             $g = $page->add('Grid');
             $g->setModel($m,['company','buy_qty','buy_value','buy_amount','sell_qty','sell_value','sell_amount','created_at']);
+            $g->addPaginator($ipp=50);
             
             if($m->count()->getOne()){
                 $g->addTotals(['buy_amount','sell_amount']);

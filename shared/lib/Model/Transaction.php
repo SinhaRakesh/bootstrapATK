@@ -4,6 +4,7 @@ class Model_Transaction extends Model_Base_Table{
 	public $table = "transaction";
 
 	public $from_date;
+	public $to_date;
 	function init(){
 		parent::init();
 
@@ -55,6 +56,29 @@ class Model_Transaction extends Model_Base_Table{
 		$this->addExpression('fifo_sell_amount')->set(function($m,$q){
 			return $q->expr('IFNULL([0],0) * IFNULL([1],0)',[$m->getElement('fifo_sell_qty'),$m->getElement('fifo_sell_price')]);
 		});
+
+		$this->addExpression('company_latest_closing_value')->set(function($m,$q){
+			$db = $m->add('Model_DailyBhav',['table_alias'=>'dbv']);
+			$db->addCondition('company_id',$m->getElement('company_id'))
+				->addCondition('created_at','<=',$this->to_date)
+				->setOrder('created_at','desc')
+				->setLimit(1)
+				;
+			return $q->expr('[0]',[$db->fieldQuery('last')]);
+		})->type('money');
+
+		$this->addExpression('fifo_buy_amount')->set(function($m,$q){
+			return $q->expr('IFNULL([0],0) * IFNULL([1],0)',[$m->getElement('fifo_remaining_qty'),$m->getElement('buy_value')]);
+		});
+
+		$this->addExpression('current_buy_amount')->set(function($m,$q){
+			return $q->expr('IFNULL([0],0) * IFNULL([1],0)',[$m->getElement('fifo_remaining_qty'),$m->getElement('company_latest_closing_value')]);
+		});
+
+		$this->addExpression('current_pl')->set(function($m,$q){
+			return $q->expr('([0]-[1])',[$m->getElement('current_buy_amount'),$m->getElement('fifo_buy_amount')]);
+		})->type('money');
+
 		// $this->addExpression('fifo_remaining_qty')->set('IFNULL(buy_qty,0) - IFNULL(fifo_sell_qty,0)')->type('Number');
 		// $this->addExpression('buy_amount')->set('IFNULL(buy_value,0) * IFNULL(buy_qty,0)');
 		// $this->addExpression('sell_amount')->set('IFNULL(sell_value,0) * IFNULL(sell_qty,0)');

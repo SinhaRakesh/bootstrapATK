@@ -70,3 +70,10 @@ input.ui-button,
 .icon-search:before{
   content: "\f002";
 }
+
+.ui-dialog-titlebar-close span {
+  display: none;
+}
+.ui-dialog-titlebar-close:after {
+  content: 'x';
+}

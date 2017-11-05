@@ -56,6 +56,9 @@ class Admin extends App_Frontend {
         // $m = $this->layout->addFooter('Menu_Horizontal');
         // $m->addItem('foobar');
         // $this->initTopMenu();
+
+        $this->layout->template->set($this->app->page,'active');
+        
     }
 
     function initTopMenu(){

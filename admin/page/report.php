@@ -91,7 +91,7 @@ class page_report extends Page {
 
         $model->addExpression('gain')->set(function($m,$q){
             return $q->expr('(([0]/[1])*100)',[$m->getElement('pl'),$m->getElement('fifo_remaining_amount')]);
-        })->type('money');
+        })->type('money')->caption('Gain %');
 
         $model->addCondition('fifo_remaining_qty','>',0);
         $model->addCondition('client_id',$client_id);
@@ -128,12 +128,12 @@ class page_report extends Page {
             $tra->addExpression('total_sell_amount')->set('sum(sell_price * sell_qty)')->type('money');
             $tra->addExpression('total_buy_amount')->set('sum(buy_price * sell_qty)')->type('money');
             $tra->addExpression('LTCP')->set(function($m,$q){
-                return $q->expr('IFNULL(([total_sell_amount]/[total_buy_amount])*100,0)',
+                return $q->expr('IFNULL((([total_sell_amount]-[total_buy_amount])/[total_buy_amount])*100,0)',
                         [
                         'total_sell_amount'=>$m->getElement('total_sell_amount'),
                         'total_buy_amount'=>$m->getElement('total_buy_amount')
                     ]);
-            })->type('money');
+            })->type('money')->caption('LTCG(%))');
             $tra->addCondition('client_id',$client_id)
                 ->addCondition('sell_date','<',$fin_start_date)
                 ->addCondition('sell_duration','>',365)
@@ -193,12 +193,12 @@ class page_report extends Page {
             $tra->addExpression('total_sell_amount')->set('sum(sell_price * sell_qty)')->type('money');
             $tra->addExpression('total_buy_amount')->set('sum(buy_price * sell_qty)')->type('money');
             $tra->addExpression('STCP')->set(function($m,$q){
-                return $q->expr('(IFNULL(([total_sell_amount]/[total_buy_amount])*100,0))',
+                return $q->expr('((([total_sell_amount]-[total_buy_amount])/[total_buy_amount])*100)',
                         [
                         'total_sell_amount'=>$m->getElement('total_sell_amount'),
                         'total_buy_amount'=>$m->getElement('total_buy_amount')
                     ]);
-            })->type('money');
+            })->type('money')->caption('STCG(%)');
             $tra->addCondition('client_id',$client_id)
                 ->addCondition('sell_date','>=',$fin_start_date)
                 ->addCondition('sell_date','<',$this->app->nextDate($fin_end_date))
@@ -246,7 +246,7 @@ class page_report extends Page {
     }
 
     function getFinancialYear(){
-        $startDate = '2000-04-01';
+        $startDate = '1970-04-01';
         $endDate = $this->app->today;
 
         $prefix = '';
