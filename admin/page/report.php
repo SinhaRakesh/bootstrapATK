@@ -9,8 +9,12 @@ class page_report extends Page {
 
         $type = $this->app->stickyGET('type');
         $c_id = $this->app->stickyGET('client');
+        $f_year = $this->app->stickyGET('financial_year');
 
         $form = $this->add('Form');
+        $fld_year = $form->addField('DropDown','financial_year');
+        $fld_year->setValueList($this->getFinancialYear());       
+
         $fld_client = $form->addField('autocomplete/Basic','client');
         $fld_client->setModel('Client');
         // $fld_client->setEmptyText('All');
@@ -26,6 +30,13 @@ class page_report extends Page {
 
         $form->addSubmit('Generate Report');
 
+        if($f_year){
+            $temp = explode("-", $f_year);
+            $this->financial_start_date = date("$temp[0]-04-01");
+            $this->financial_end_date = date('Y-03-t',strtotime('+1 year',strtotime($this->financial_start_date)));
+            $fld_year->set($f_year);
+        }
+        
         if($type == "stock_report"){
             $this->addStockReport($c_id);
 
@@ -48,7 +59,7 @@ class page_report extends Page {
         if($form->isSubmitted()){
             if($form['report_type'] == "stock_report" && !$form['client']) $form->error('client','must not be empty');
             
-            $this->js()->reload(['client'=>$form['client'],'type'=>$form['report_type']])->execute();
+            $this->js()->reload(['client'=>$form['client'],'type'=>$form['report_type'],'financial_year'=>$form['financial_year']])->execute();
         }
     }
 
@@ -85,6 +96,9 @@ class page_report extends Page {
         $model->addCondition('fifo_remaining_qty','>',0);
         $model->addCondition('client_id',$client_id);
         
+        $model->addCondition('created_at','>=',$this->financial_start_date);
+        $model->addCondition('created_at','<',$this->financial_end_date);
+
         $grid = $this->add('Grid');
         $grid->setModel($model,['date','company','buy_qty','buy_value','buy_amount','fifo_remaining_qty','fifo_remaining_amount','cmp','cmp_amount','pl','gain']);
         $grid->add('misc/Export');
@@ -99,12 +113,15 @@ class page_report extends Page {
     }
 
     function addLongTermReport($client_id){
-        $on_date = $this->app->stickyGET('date');
-        if(!$on_date) $on_date = $this->app->today;
+        // $on_date = $this->app->stickyGET('date');
+        // if(!$on_date) $on_date = $this->app->today;
 
-        $strtotime = strtotime($on_date);
-        $fin_start_date = (date('m',$strtotime) < '04') ? date('Y-04-01',strtotime('-1 year',$strtotime)) : date('Y-04-01',$strtotime);
-        $fin_end_date = date('Y-03-t',strtotime('+1 year',strtotime($fin_start_date)));
+        // $strtotime = strtotime($on_date);
+        // $fin_start_date = (date('m',$strtotime) < '04') ? date('Y-04-01',strtotime('-1 year',$strtotime)) : date('Y-04-01',$strtotime);
+        // $fin_end_date = date('Y-03-t',strtotime('+1 year',strtotime($fin_start_date)));
+
+        $fin_start_date = $this->financial_start_date;
+        $fin_end_date = $this->financial_end_date;
 
         if($client_id){
             $tra = $this->add('Model_FifoSell');
@@ -148,7 +165,7 @@ class page_report extends Page {
                     $m->addCondition('sell_duration','>',365);
 
                     $g = $page->add('Grid');
-                    $g->setModel($m,['date','client','company','buy_amount','sell_amount']);
+                    $g->setModel($m);
                     $g->addTotals(['buy_amount','sell_amount']);
             });
         }else{
@@ -160,13 +177,16 @@ class page_report extends Page {
     }
 
     function addShortTermReport($client_id){
-        $on_date = $this->app->stickyGET('date');
-        if(!$on_date) $on_date = $this->app->today;
+        // $on_date = $this->app->stickyGET('date');
+        // if(!$on_date) $on_date = $this->app->today;
 
-        $strtotime = strtotime($on_date);
-        $fin_start_date = (date('m',$strtotime) < '04') ? date('Y-04-01',strtotime('-1 year',$strtotime)) : date('Y-04-01',$strtotime);
-        $fin_end_date = date('Y-03-t',strtotime('+1 year',strtotime($fin_start_date)));
+        // $strtotime = strtotime($on_date);
+        // $fin_start_date = (date('m',$strtotime) < '04') ? date('Y-04-01',strtotime('-1 year',$strtotime)) : date('Y-04-01',$strtotime);
+        // $fin_end_date = date('Y-03-t',strtotime('+1 year',strtotime($fin_start_date)));
 
+        $fin_start_date = $this->financial_start_date;
+        $fin_end_date = $this->financial_end_date;
+        
         if($client_id){
 
             $tra = $this->add('Model_FifoSell');
@@ -212,7 +232,7 @@ class page_report extends Page {
                     $m->addCondition('sell_duration','<',365);
 
                     $g = $page->add('Grid');
-                    $g->setModel($m,['date','client','company','buy_amount','sell_amount']);
+                    $g->setModel($m);
                     $g->addTotals(['buy_amount','sell_amount']);
             });  
         }else{
@@ -223,7 +243,55 @@ class page_report extends Page {
             $grid->setModel($m,['name','short_term_capital_gain']);
         }
 
+    }
 
+    function getFinancialYear(){
+        $startDate = '2000-04-01';
+        $endDate = $this->app->today;
+
+        $prefix = '';
+        $ts1 = strtotime($startDate);
+        $ts2 = strtotime($endDate);
+
+        $year1 = date('Y', $ts1);
+        $year2 = date('Y', $ts2);
+
+        $month1 = date('m', $ts1);
+        $month2 = date('m', $ts2);
+
+        //get months
+        $diff = (($year2 - $year1) * 12) + ($month2 - $month1);
+
+        /**
+         * if end month is greater than april, consider the next FY
+         * else dont consider the next FY
+         */
+        $total_years = ($month2 > 4)?ceil($diff/12):floor($diff/12);
+
+        $fy = array();
+
+        while($total_years >= 0) {
+
+            $prevyear = $year1 - 1;
+
+            //We dont need 20 of 20** (like 2014)
+            $fy[$prevyear.'-'.$year1] = $prevyear.'-'.$year1;
+            // $fy[] = $prefix.substr($prevyear,-2).'-'.substr($year1,-2);
+
+            $year1 += 1;
+
+            $total_years--;
+        }
+        /**
+         * If start month is greater than or equal to april, 
+         * remove the first element
+         */
+        if($month1 >= 4) {
+            unset($fy[0]);
+        }
+        /* Concatenate the array with ',' */
+        return array_reverse( $fy);
+        // return implode(',',$fy);
     }
 
 }
