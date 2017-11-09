@@ -7,9 +7,9 @@ class Model_Company extends Model_Base_Table{
 	function init(){
 		parent::init();
 
-		$this->addField('sc_name');
+		$this->addField('sc_name')->caption('Script Name');
 		$this->addField('isin_code')->caption('ISIN_CODE');
-		$this->addField('sc_code');
+		$this->addField('sc_code')->caption('Script Code');
 		$this->addField('sc_group');
 		$this->addField('sc_type');
 

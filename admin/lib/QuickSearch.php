@@ -7,7 +7,7 @@ class QuickSearch extends Filter
     // icons
     public $submit_icon = 'ui-icon-search';
     public $cancel_icon = 'fa fa-remove';
-
+    public $placeholder = "Search";
     // field
     public $search_field;
 
@@ -26,6 +26,7 @@ class QuickSearch extends Filter
     {
         parent::init();
 
+        
         // template fixes
         $this->addClass('atk-form atk-form-stacked atk-form-compact atk-move-right');
         $this->template->trySet('fieldset', 'atk-row');
@@ -34,7 +35,9 @@ class QuickSearch extends Filter
         $this->addClass('atk-col-3');
 
         // add field
-        $this->search_field = $this->addField('Line', 'q', '')->setAttr('placeholder', 'Search')->setNoSave();
+        $this->search_field = $this->addField('Line', 'q', '')
+            ->setAttr('placeholder', $this->placeholder)
+            ->setNoSave();
 
         // cancel button
         if ($this->show_cancel && $this->recall($this->search_field->short_name)) {

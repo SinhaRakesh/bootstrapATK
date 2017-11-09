@@ -12,9 +12,6 @@ class page_report extends Page {
         $f_year = $this->app->stickyGET('financial_year');
 
         $form = $this->add('Form');
-        $fld_year = $form->addField('DropDown','financial_year');
-        $fld_year->setValueList($this->getFinancialYear());       
-
         $fld_client = $form->addField('autocomplete/Basic','client');
         $fld_client->setModel('Client');
         // $fld_client->setEmptyText('All');
@@ -28,6 +25,13 @@ class page_report extends Page {
             ]);
         $fld_type->set($type);
 
+        $fld_type->js(true)->univ()->bindConditionalShow([
+                'stock_report'=>['client'],
+                '*'=>['client','financial_year']
+            ],'div.atk-form-row');
+
+        $fld_year = $form->addField('DropDown','financial_year');
+        $fld_year->setValueList($this->getFinancialYear());       
         $form->addSubmit('Generate Report');
 
         if($f_year){
@@ -61,16 +65,19 @@ class page_report extends Page {
             
             $this->js()->reload(['client'=>$form['client'],'type'=>$form['report_type'],'financial_year'=>$form['financial_year']])->execute();
         }
+
     }
 
 
     function addStockReport($client_id){
         $model = $this->add('Model_Transaction');
-        $model->addExpression('date')->set('Date_Format(created_at,"%d %M %Y")');
-        
+        $model->addExpression('date')->set('Date_Format(created_at,"%d %M %Y")')->caption('Buy Date');
+        $model->getElement('company_id')->caption('Stock');
+        $model->getElement('fifo_remaining_qty')->caption('Hold Qty');
+
         $model->addExpression('fifo_remaining_amount')->set(function($m,$q){
             return $q->expr('([0] * [1])',[$m->getElement('fifo_remaining_qty'),$m->getElement('buy_value')]);
-        })->type('money');
+        })->type('money')->caption('Hold Amount');
 
         $model->addExpression('cmp')->set(function($m,$q){
             $c = $m->add('Model_DailyBhav')
@@ -79,15 +86,15 @@ class page_report extends Page {
                 ->setLimit(1)
                 ;
             return $q->expr('IFNULL([0],0)',[$c->fieldQuery('last')]);
-        })->type('money');
+        })->type('money')->caption('Current Value (CMP)');
 
         $model->addExpression('cmp_amount')->set(function($m,$q){
             return $q->expr('([0] * [1])',[$m->getElement('fifo_remaining_qty'),$m->getElement('cmp')]);
-        })->type('money');
+        })->type('money')->caption('Current Value Amount');
 
         $model->addExpression('pl')->set(function($m,$q){
             return $q->expr('([0]-[1])',[$m->getElement('cmp_amount'),$m->getElement('fifo_remaining_amount')]);
-        })->type('money')->caption('P/L');
+        })->type('money')->caption('Profit/ Loss');
 
         $model->addExpression('gain')->set(function($m,$q){
             return $q->expr('(([0]/[1])*100)',[$m->getElement('pl'),$m->getElement('fifo_remaining_amount')]);

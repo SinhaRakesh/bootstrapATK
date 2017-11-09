@@ -10,7 +10,7 @@ class page_client extends Page {
         $model = $this->add('Model_Client');
         $crud = $this->add('CRUD');
         $crud->setModel($model,
-                ['name','client_code','phone_number','email_id','state_id','city_id','address1','address2','pin_code','is_active'],
+                ['name','client_code','phone_number','email_id','address1','address2','state_id','city_id','pin_code','is_active'],
                 ['name','client_code','phone_number','email_id','state','city','is_active']
             );
         $crud->grid->addPaginator(50);
