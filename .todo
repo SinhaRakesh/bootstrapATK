@@ -40,3 +40,14 @@ Member Admin Panel
 	- settings
 		- user name and password change
 		- flat profile
+
+
+
+
+
+client transaction clinr data
+report client search by name and id
+	auto complete hint 
+	STGC - negative sign removed
+	stock managemnt
+	search by scrit_name or isin_code

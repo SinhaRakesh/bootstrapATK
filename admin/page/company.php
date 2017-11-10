@@ -2,7 +2,7 @@
 
 class page_company extends Page {
 
-    public $title='Company Management';
+    public $title='Stock Management';
 
     function init() {
         parent::init();

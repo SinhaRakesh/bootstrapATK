@@ -10,8 +10,8 @@ class page_report extends Page {
         $type = $this->app->stickyGET('type');
         $c_id = $this->app->stickyGET('client');
         $f_year = $this->app->stickyGET('financial_year');
-
-        $form = $this->add('Form');
+        
+        $form = $this->add('Form',null,null,['form/horizontal']);
         $fld_client = $form->addField('autocomplete/Basic','client');
         $fld_client->setModel('Client');
         // $fld_client->setEmptyText('All');
@@ -20,8 +20,8 @@ class page_report extends Page {
         $fld_type = $form->addField('DropDown','report_type');
         $fld_type->setValueList([
                 'stock_report'=>'Stock Report (till date)',
-                'short_term'=>'Short Term Gain Report',
-                'long_term'=>'Long Term Gain Report'
+                'short_term'=>'Short Term Report',
+                'long_term'=>'Long Term Report'
             ]);
         $fld_type->set($type);
 
@@ -94,7 +94,7 @@ class page_report extends Page {
 
         $model->addExpression('pl')->set(function($m,$q){
             return $q->expr('([0]-[1])',[$m->getElement('cmp_amount'),$m->getElement('fifo_remaining_amount')]);
-        })->type('money')->caption('Profit/ Loss');
+        })->type('money')->caption('Profit/<span style="color:red;"> Loss</span>');
 
         $model->addExpression('gain')->set(function($m,$q){
             return $q->expr('(([0]/[1])*100)',[$m->getElement('pl'),$m->getElement('fifo_remaining_amount')]);
@@ -140,9 +140,10 @@ class page_report extends Page {
                         'total_sell_amount'=>$m->getElement('total_sell_amount'),
                         'total_buy_amount'=>$m->getElement('total_buy_amount')
                     ]);
-            })->type('money')->caption('LTCG(%))');
+            })->type('money')->caption('LTGC %');
             $tra->addCondition('client_id',$client_id)
-                ->addCondition('sell_date','<',$fin_start_date)
+                ->addCondition('sell_date','>=',$fin_start_date)
+                ->addCondition('sell_date','<',$this->app->nextDate($fin_end_date))
                 ->addCondition('sell_duration','>',365)
                 ;
             $tra->_dsql()->group('company_id');
@@ -205,7 +206,7 @@ class page_report extends Page {
                         'total_sell_amount'=>$m->getElement('total_sell_amount'),
                         'total_buy_amount'=>$m->getElement('total_buy_amount')
                     ]);
-            })->type('money')->caption('STCG(%)');
+            })->type('money')->caption('STGC %');
             $tra->addCondition('client_id',$client_id)
                 ->addCondition('sell_date','>=',$fin_start_date)
                 ->addCondition('sell_date','<',$this->app->nextDate($fin_end_date))

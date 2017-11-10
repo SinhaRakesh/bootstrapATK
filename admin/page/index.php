@@ -21,7 +21,7 @@ class page_index extends Page {
         // $form->setLayout($template);
 
         $col1->addField('DatePicker','date')->set($on_date);
-        $col2->addSubmit('filter');
+        $col2->addSubmit('Filter');
 
         $m = $this->add('Model_ClientData',['on_date'=>$on_date]);
 
@@ -30,8 +30,8 @@ class page_index extends Page {
         $m->getElement('today_sell_value')->caption('Share Sold (INR)');
         $m->getElement('buy_value')->caption('Share Value (INR)');
         $m->getElement('buy_current_value')->caption('Current Value (INR)');
-        $m->getElement('profit')->caption('Profit/Loss');
-
+        $m->getElement('profit')->caption('Profit/<p style="color:red;">Loss</p>');
+        
         $grid = $this->add('Grid');
         $grid->setModel($m,['name','today_buying_value','today_sell_value','buy_value','buy_current_value','net_investment','buy_current_value','profit','ror']);
         $grid->addPaginator($ipp=50);
