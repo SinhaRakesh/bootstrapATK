@@ -176,7 +176,7 @@ class page_report extends Page {
                     $g->addTotals(['buy_amount','sell_amount']);
             });
         }else{
-            $m = $this->add('Model_ClientData',['on_date'=>$on_date]);
+            $m = $this->add('Model_ClientData',['fin_start_date'=>$this->financial_start_date,'fin_end_date'=>$this->financial_end_date]);
             $grid = $this->add('Grid');
             $grid->setModel($m,['name','long_term_capital_gain']);
         }
@@ -243,7 +243,7 @@ class page_report extends Page {
                     $g->addTotals(['buy_amount','sell_amount']);
             });  
         }else{
-            $m = $this->add('Model_ClientData',['on_date'=>$on_date]);
+            $m = $this->add('Model_ClientData',['fin_start_date'=>$this->financial_start_date,'fin_end_date'=>$this->financial_end_date]);
             // if($client_id)
             //     $m->addCondition('id',$client_id);
             $grid = $this->add('Grid');

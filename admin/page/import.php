@@ -9,26 +9,37 @@ class page_import extends Page {
 
         // bhav
         $form_bhav = $this->add('Form');
-        $form_bhav->template->loadTemplateFromString('<form method="POST" action="'.$this->api->url('./bhavexecute').'" enctype="multipart/form-data"><div class="project"><div class="row bg-white has-shadow"><div class="project-title d-flex align-items-center col-md-4">  <div class="text"><h3 class="h4">Upload Daily BHAV</h3></div></div><div class="col-md-5"><input name="csv_bhav_file" type="file"><br/><p style="color:gray;">hint: Select CSV File Only</p> </div><div class="col-md-3"><input value="Upload" class="btn btn-primary" type="submit"></div></div></div></form>');
+        $form_bhav->template->loadTemplateFromString('<form method="POST" action="'.$this->api->url('./bhavexecute').'" enctype="multipart/form-data"><div class="project"><div class="row bg-white has-shadow"><div class="project-title d-flex align-items-center col-md-4">  <div class="text"><h3 class="h4">Upload Daily BHAV</h3></div></div><div class="col-md-5"><input name="csv_bhav_file" type="file"><br/><p style="color:gray;">hint: Select CSV File Only</p> </div><div class="col-md-3"><input value="Upload" class="btn btn-primary" type="submit"><hr/> <a download href="templates/csv/sample_of_daily_bhav.csv">Download Sample CSV File</a></div></div></div></form>');
         
         // transaction
         $form_tran = $this->add('Form');
-        $form_tran->template->loadTemplateFromString('<form method="POST" action="'.$this->api->url('./tranexecute').'" enctype="multipart/form-data"><div class="project"><div class="row bg-white has-shadow"><div class="project-title d-flex align-items-center col-md-4">  <div class="text"><h3 class="h4">Upload Client Daily Transaction</h3></div></div><div class="col-md-5"><input type="file" name="csv_tran_file"/><br/><p style="color:gray;">hint: Select CSV File Only</p> </div><div class="col-md-3"><input type="submit" class="btn btn-primary" value="Upload"/></div></div></div></form>');
+        $form_tran->template->loadTemplateFromString('<form method="POST" action="'.$this->api->url('./tranexecute').'" enctype="multipart/form-data"><div class="project"><div class="row bg-white has-shadow"><div class="project-title d-flex align-items-center col-md-4">  <div class="text"><h3 class="h4">Upload Client Daily Transaction</h3></div></div><div class="col-md-5"><input type="file" name="csv_tran_file"/><br/><p style="color:gray;">hint: Select CSV File Only</p> </div><div class="col-md-3"><input type="submit" class="btn btn-primary" value="Upload"/><hr/> <a download href="templates/csv/sample_of_daily_transaction.csv">Download Sample CSV File</a></div></div></div></form>');
         
         $this->add('View')->setElement('hr');
         $this->add('View')->setElement('h4')->set('Builk Data Upload');
         $this->add('View')->setElement('hr');
         // client
         $form_client = $this->add('Form');
-        $form_client->template->loadTemplateFromString('<form method="POST" action="'.$this->api->url('./clientexecute').'" enctype="multipart/form-data"><div class="project"><div class="row bg-white has-shadow"><div class="project-title d-flex align-items-center col-md-4"><div class="text"><h3 class="h4">Upload Client</h3></div></div><div class="col-md-5"><input type="file" name="csv_client_file" /><br/><p style="color:gray;">hint: Select CSV File Only</p> </div><div class="col-md-3"><input type="submit" class="btn btn-primary" value="Upload" /></div></div></div></form>');
+        $form_client->template->loadTemplateFromString('<form method="POST" action="'.$this->api->url('./clientexecute').'" enctype="multipart/form-data"><div class="project"><div class="row bg-white has-shadow"><div class="project-title d-flex align-items-center col-md-4"><div class="text"><h3 class="h4">Upload Client</h3></div></div><div class="col-md-5"><input type="file" name="csv_client_file" /><br/><p style="color:gray;">hint: Select CSV File Only</p> </div><div class="col-md-3"><input type="submit" class="btn btn-primary" value="Upload" /><hr/> <a download href="templates/csv/sample_of_client.csv">Download Sample CSV File</a></div></div></div></form>');
 
         // buy data
         $form_client_buy = $this->add('Form');
-        $form_client_buy->template->loadTemplateFromString('<form method="POST" action="'.$this->api->url('./clientbuyexecute').'" enctype="multipart/form-data"><div class="project"><div class="row bg-white has-shadow"><div class="project-title d-flex align-items-center col-md-4"><div class="text"><h3 class="h4">Upload Client Wise Buy Data</h3></div></div><div class="col-md-5"><input type="file" name="csv_client_buy_file" /><br/><p style="color:gray;">hint: Select CSV File Only</p> </div><div class="col-md-3"><input type="submit" class="btn btn-primary" value="Upload" /></div></div></div></form>');
+        $form_client_buy->template->loadTemplateFromString('<form method="POST" action="'.$this->api->url('./clientbuyexecute').'" enctype="multipart/form-data"><div class="project"><div class="row bg-white has-shadow"><div class="project-title d-flex align-items-center col-md-4"><div class="text"><h3 class="h4">Upload Client Wise Buy Data</h3></div></div><div class="col-md-5"><input type="file" name="csv_client_buy_file" /><br/><p style="color:gray;">hint: Select CSV File Only</p> </div><div class="col-md-3"><input type="submit" class="btn btn-primary" value="Upload" /><hr/> <a download href="templates/csv/sample_of_client_wise_buy_data.csv">Download Sample CSV File</a></div></div></div></form>');
         
         // sell data
         $form_client_sell = $this->add('Form');
-        $form_client_sell->template->loadTemplateFromString('<form method="POST" action="'.$this->api->url('./clientsellexecute').'" enctype="multipart/form-data"><div class="project"><div class="row bg-white has-shadow"><div class="project-title d-flex align-items-center col-md-4"><div class="text"><h3 class="h4">Upload Client Wise Sell Data</h3></div></div><div class="col-md-5"><input type="file" name="csv_client_sell_file" /><br/><p style="color:gray;">hint: Select CSV File Only</p> </div><div class="col-md-3"><input type="submit" class="btn btn-primary" value="Upload" /></div></div></div></form>');
+        $form_client_sell->template->loadTemplateFromString('<form method="POST" action="'.$this->api->url('./clientsellexecute').'" enctype="multipart/form-data"><div class="project"><div class="row bg-white has-shadow"><div class="project-title d-flex align-items-center col-md-4"><div class="text"><h3 class="h4">Upload Client Wise Sell Data</h3></div></div><div class="col-md-5"><input type="file" name="csv_client_sell_file" /><br/><p style="color:gray;">hint: Select CSV File Only</p> </div><div class="col-md-3"><input type="submit" class="btn btn-primary" value="Upload" /><hr/> <a download href="templates/csv/sample_of_client_wise_sell_data.csv">Download Sample CSV File</a></div></div></div></form>');
+        
+        // $this->on('click','.download-csv',function($js,$data){
+        //     return $js->alert('');
+        //     $header = ['id','name','department','post','working_type_unit','unit_count'];
+        //     $fp = fopen("php://output", "w");
+        //     fputcsv ($fp, $header, "\t");
+        //     fclose($fp);
+        //     header("Content-type: text/csv");
+        //     header("Content-disposition: attachment; filename=\"sample_xepan_attandance_import.csv\"");
+        //     exit;
+        // });
     }
 
     function page_bhavexecute(){
