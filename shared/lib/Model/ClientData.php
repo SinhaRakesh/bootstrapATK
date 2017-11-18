@@ -105,7 +105,7 @@ class Model_ClientData extends Model_Client{
         })->type('money');
 
 		$this->addExpression('profit')->set(function($m,$q){
-            return $q->expr('(IFNULL(ABS([buy_current_value]),0) - IFNULL(ABS([net_investment]),0))',['buy_current_value'=>$m->getElement('buy_current_value'),'net_investment'=>$m->getElement('net_investment')]);
+            return $q->expr('IF([buy_current_value] > 0,(IFNULL(ABS([buy_current_value]),0) - IFNULL(ABS([net_investment]),0)), "-")',['buy_current_value'=>$m->getElement('buy_current_value'),'net_investment'=>$m->getElement('net_investment')]);
         })->type('money');
 
 		$this->addExpression('ror')->set(function($m,$q){

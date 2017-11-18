@@ -45,6 +45,10 @@ class Model_FifoSell extends Model_Base_Table{
 		$this->addExpression('sell_amount')->set('(sell_price * sell_qty)')->type('money');
         $this->addExpression('buy_amount')->set('(buy_price * sell_qty)')->type('money');
 
+        $this->addExpression('pl')->set(function($m,$q){
+			return $q->expr('IF([sell_amount] > 0 , ([sell_amount]- [buy_amount]),0)',['sell_amount'=>$m->getElement('fifo_sell_amount'),'buy_amount'=>$m->getElement('buy_amount')]);
+		})->type('money');
+
 		$this->add('dynamic_model/Controller_AutoCreator');
 	}
 

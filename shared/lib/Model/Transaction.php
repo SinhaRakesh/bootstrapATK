@@ -71,9 +71,17 @@ class Model_Transaction extends Model_Base_Table{
 			return $q->expr('IFNULL([0],0)',[$db->fieldQuery('last')]);
 		})->type('money');
 
-		// $this->addExpression('fifo_sell_amount')->set(function($m,$q){
-		// 	return $q->expr('IFNULL([0],0) * IFNULL([1],0)',[$m->getElement('fifo_sell_qty'),$m->getElement('fifo_sell_price')]);
-		// });
+		$this->addExpression('fifo_sell_amount')->set(function($m,$q){
+			$t = $m->add('Model_FifoSell')
+				->addCondition('transaction_id',$m->getElement('id'))
+				;
+			return $q->expr('IFNULL([0],0)',[$t->sum('fifo_sell_amount')]);
+		})->type('money');
+
+		$this->addExpression('no_profit_buy_amount')->set(function($m,$q){
+
+		})->type('money');
+
 		// current stock holding by amount
 		$this->addExpression('fifo_buy_amount')->set(function($m,$q){
 			return $q->expr('IFNULL([0],0) * IFNULL([1],0)',[$m->getElement('fifo_remaining_qty'),$m->getElement('buy_value')]);
@@ -93,7 +101,10 @@ class Model_Transaction extends Model_Base_Table{
 
 
 		$this->addExpression('current_pl')->set(function($m,$q){
-			return $q->expr('(IFNULL([0],0)-IFNULL([1],0))',[$m->getElement('current_buy_amount'),$m->getElement('fifo_buy_amount')]);
+			$tra = $m->add('Model_FifoSell',['table_alias'=>'ltcgwdsdsds']);
+			$tra->addCondition('transaction_id',$m->getElement('id'));
+
+			return $q->expr('IFNULL([0],0)',[$tra->sum('pl')]);
 		})->type('money');
 
 		// $this->addExpression('current_pl_on_date')->set(function($m,$q){
