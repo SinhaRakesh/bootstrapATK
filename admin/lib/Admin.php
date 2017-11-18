@@ -57,7 +57,7 @@ class Admin extends App_Frontend {
         // $m->addItem('foobar');
         // $this->initTopMenu();
 
-        $this->layout->template->set($this->app->page,'active');
+        $this->layout->template->trySet($this->app->page,'active');
         
     }
 

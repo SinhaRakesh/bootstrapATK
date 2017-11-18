@@ -152,29 +152,62 @@ class page_report extends Page {
             $grid->setModel($tra,['client','company','total_buy_amount','total_sell_amount','LTCP']);
             // $grid->addPaginator($ipp=50);
 
+            $grid->addHook('formatRow',function($g){
+                $g->current_row_html['LTCP'] = round(abs($g->model['LTCP']),2);
+            });
+
+            $grid->addHook('formatTotalsRow',function($g){
+               $g->current_row_html['LTCP'] = round((($g->totals['total_sell_amount'] - $g->totals['total_buy_amount'])/$g->totals['total_buy_amount'])*100,2);
+            });
+
+
             if($tra->count()->getOne()){
-                $grid->add('misc/Export');
-                $grid->addTotals(['total_sell_amount','total_buy_amount']);
+                $ex_btn = $grid->addButton('Export CSV');
+                $ex_btn->js("click")->univ()->location($this->api->url(null, array($ex_btn->name => "1")));
+
+                $grid->addTotals(['total_sell_amount','total_buy_amount','LTCP']);
+
+                if($_GET[$ex_btn->name] == "1"){
+                    $this->app->stickyForget($ex_btn->name);
+                    $this->export('long');
+                }
+                
+                // $grid->add('misc/Export');
             }
 
             $grid->add('VirtualPage')
-                ->addColumn('detail')
+                ->addColumn('detail','Detail')
                 ->set(function($page)use($client_id,$fin_start_date,$fin_end_date){
                     $id = $_GET[$page->short_name.'_id'];
                     $old_model = $this->add('Model_FifoSell')->load($id);
-
-                    $m = $page->add('Model_FifoSell');
+                        
+                    $m = $page->add('Model_FifoSellProfit');
                     $m->addExpression('date')->set(function($m,$q){
                         return $q->expr('Date_Format([0],"%d %M %Y")',[$m->getElement('tran_date')]);
                     });
                     $m->addCondition('client_id',$old_model['client_id']);
                     $m->addCondition('company_id',$old_model['company_id']);
-                    $m->addCondition('sell_date','<',$fin_start_date);
+                    $m->addCondition('sell_date','>=',$fin_start_date);
+                    $m->addCondition('sell_date','<',$this->app->nextDate($fin_end_date));
                     $m->addCondition('sell_duration','>',365);
 
                     $g = $page->add('Grid');
-                    $g->setModel($m);
-                    $g->addTotals(['buy_amount','sell_amount']);
+                    $g->add('View',null,'quick_search')->setHtml('<strong>Client:</strong> '.$old_model['client']);
+
+                    $g->setModel($m,['company','date','buy_qty','buy_price','buy_amount','sell_date_only','sell_qty','sell_price','sell_amount','pl','gain']);
+                    $g->addTotals(['buy_amount','sell_amount','pl','gain']);
+
+                    $g->addHook('formatRow',function($g){
+                        if($g->model['pl'] < 0 ){
+                            $g->current_row_html['pl'] = abs($g->model['pl']);
+                            $g->current_row_html['gain'] = round(abs($g->model['gain']),2);
+                        }
+                    });
+
+                    $g->addHook('formatTotalsRow',function($g){
+                        $g->current_row_html['pl'] = abs($g->totals['pl']);
+                        $g->current_row['gain'] = abs(round((($g->totals['sell_amount'] - $g->totals['buy_amount'])/$g->totals['buy_amount']*100),2));
+                    });
             });
         }else{
             $m = $this->add('Model_ClientData',['fin_start_date'=>$this->financial_start_date,'fin_end_date'=>$this->financial_end_date]);
@@ -207,6 +240,7 @@ class page_report extends Page {
                         'total_buy_amount'=>$m->getElement('total_buy_amount')
                     ]);
             })->type('money')->caption('STGC %');
+
             $tra->addCondition('client_id',$client_id)
                 ->addCondition('sell_date','>=',$fin_start_date)
                 ->addCondition('sell_date','<',$this->app->nextDate($fin_end_date))
@@ -218,21 +252,37 @@ class page_report extends Page {
             $grid->setModel($tra,['client','company','total_buy_amount','total_sell_amount','STCP']);
             // $grid->addPaginator($ipp=50);
 
+            $grid->addHook('formatRow',function($g){
+                $g->current_row_html['STCP'] = round(abs($g->model['STCP']),2);
+            });
+
+            $grid->addHook('formatTotalsRow',function($g){
+               $g->current_row_html['STCP'] = round((($g->totals['total_sell_amount'] - $g->totals['total_buy_amount'])/$g->totals['total_buy_amount'])*100,2);
+            });
+
             if($tra->count()->getOne()){
-                $grid->add('misc/Export');
-                $grid->addTotals(['total_sell_amount','total_buy_amount']);
+                $ex_btn = $grid->addButton('Export CSV');
+                $ex_btn->js("click")->univ()->location($this->api->url(null, array($ex_btn->name => "1")));
+
+                $grid->addTotals(['total_sell_amount','total_buy_amount','STCP']);
+                if($_GET[$ex_btn->name] == "1"){
+                    $this->app->stickyForget($ex_btn->name);
+                    $this->export('short');
+                }
             }
 
+
             $grid->add('VirtualPage')
-                ->addColumn('detail')
+                ->addColumn('detail','Detail')
                 ->set(function($page)use($client_id,$fin_start_date,$fin_end_date){
                     $id = $_GET[$page->short_name.'_id'];
                     $old_model = $this->add('Model_FifoSell')->load($id);
 
-                    $m = $page->add('Model_FifoSell');
+                    $m = $page->add('Model_FifoSellProfit');
                     $m->addExpression('date')->set(function($m,$q){
                         return $q->expr('Date_Format([0],"%d %M %Y")',[$m->getElement('tran_date')]);
-                    });
+                    })->caption('Buy Date');
+
                     $m->addCondition('client_id',$old_model['client_id']);
                     $m->addCondition('company_id',$old_model['company_id']);
                     $m->addCondition('sell_date','>=',$fin_start_date);
@@ -240,8 +290,22 @@ class page_report extends Page {
                     $m->addCondition('sell_duration','<',365);
 
                     $g = $page->add('Grid');
-                    $g->setModel($m);
-                    $g->addTotals(['buy_amount','sell_amount']);
+                    $g->add('View',null,'quick_search')->setHtml('<strong>Client:</strong> '.$old_model['client']);
+                    $g->setModel($m,['company','date','buy_qty','buy_price','buy_amount','sell_date_only','sell_qty','sell_price','sell_amount','pl','gain']);
+                    $g->addTotals(['buy_amount','sell_amount','pl','gain']);
+
+                    $g->addHook('formatRow',function($g){
+                        if($g->model['pl'] < 0 ){
+                            $g->current_row_html['pl'] = abs($g->model['pl']);
+                            $g->current_row_html['gain'] = abs(round(abs($g->model['gain']),2));
+                        }
+                    });
+
+                    $g->addHook('formatTotalsRow',function($g){
+                        $g->current_row_html['pl'] = abs($g->totals['pl']);
+                        $g->current_row['gain'] = abs(round((($g->totals['sell_amount'] - $g->totals['buy_amount'])/$g->totals['buy_amount']*100),2));
+                    });
+
             });  
         }else{
             $m = $this->add('Model_ClientData',['fin_start_date'=>$this->financial_start_date,'fin_end_date'=>$this->financial_end_date]);
@@ -302,4 +366,54 @@ class page_report extends Page {
         // return implode(',',$fy);
     }
 
+    function export($type){
+        $c_model = $this->add('Model_Client')->load($_GET['client']);
+
+        $output_type = "text/csv";
+        $output_disposition = "attachment";
+        $output = "Client,Stock,Buy Date,Buy Qty, Buy Price,Buy Amount, Sell Date,Sell Qty,Sell Price,Sell Amount, Profit\Loss, Gain (%)"."\n";
+        $data = [];
+
+        $m = $this->add('Model_FifoSellProfit');
+        $m->addExpression('date')->set(function($m,$q){
+            return $q->expr('Date_Format([0],"%d %M %Y")',[$m->getElement('tran_date')]);
+        })->caption('Buy Date');
+        
+        if($type == "short"){
+            $output_filename = str_replace(" ", "_",$c_model['name'])."-ShortTerm-".$_GET['financial_year']."csv";
+
+            $m->addCondition('client_id',$_GET['client']);
+            $m->addCondition('sell_date','>=',$this->financial_start_date);
+            $m->addCondition('sell_date','<',$this->app->nextDate($this->financial_end_date));
+            $m->addCondition('sell_duration','<=',365);
+        }
+        
+        if($type == "long"){
+            $output_filename = str_replace(" ", "_",$c_model['name'])."-LongTerm-".$_GET['financial_year'].".csv";
+            $m->addCondition('client_id',$_GET['client']);
+            $m->addCondition('sell_date','>=',$this->financial_start_date);
+            $m->addCondition('sell_date','<',$this->app->nextDate($this->financial_end_date));
+            $m->addCondition('sell_duration','>',365);
+        }
+
+        $totals = [];
+        foreach ($m as $record) {
+            $output .= $record['client'].",".$record['company'].",".$record['date'].",".$record['buy_qty'].",".$record['buy_price'].",".$record['buy_amount'].",".$record['sell_date_only'].",".$record['sell_qty'].",".$record['sell_price'].",".$record['sell_amount'].",".$record['pl'].",".round($record['gain'],2)."\n";
+            $totals['buy_amount'] += $record['buy_amount'];
+            $totals['sell_amount'] += $record['sell_amount'];
+        }
+        
+        $totals['profit'] = $totals['sell_amount'] - $totals['buy_amount'];
+        if($totals['buy_amount'] > 0)
+            $totals['gain'] = round((($totals['profit'] / $totals['buy_amount'])*100),2);
+        
+        $output .= " ".","." ".","." ".","." ".","." ".",".$totals['buy_amount'].","." ".","." ".","." ".",".$totals['sell_amount'].",".$totals['profit'].",".round($totals['gain'],2)."\n";
+
+        header("Content-type: " . $output_type);
+        header("Content-disposition: " . $output_disposition . "; filename=\"" . $output_filename . "\"");
+        header("Content-Length: " . strlen($output));
+        print $output;
+        exit;
+
+    }
 }

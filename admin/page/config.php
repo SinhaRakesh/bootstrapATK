@@ -7,21 +7,21 @@ class page_config extends Page {
     function init() {
         parent::init();
 
-        $tab = $this->add('Tabs');
-        $state_tab = $tab->addTab('State');
+        $tab = $this->add('Tabs')->addClass('rtabs');
+        // $state_tab = $tab->addTab('State');
         $user_tab = $tab->addTab('User Management');
 
-        $crud = $state_tab->add('CRUD');
-        $crud->setModel('State');
-        $crud->grid->add('VirtualPage')
-            ->addColumn('city')
-            ->set(function($page){
-                $id = $_GET[$page->short_name.'_id'];
-                $crud = $page->add('CRUD');
-                $city_model = $this->add('Model_City')
-                            ->addCondition('state_id',$id);
-                $crud->setModel($city_model);
-            });
+        // $crud = $state_tab->add('CRUD');
+        // $crud->setModel('State');
+        // $crud->grid->add('VirtualPage')
+        //     ->addColumn('city','City')
+        //     ->set(function($page){
+        //         $id = $_GET[$page->short_name.'_id'];
+        //         $crud = $page->add('CRUD');
+        //         $city_model = $this->add('Model_City')
+        //                     ->addCondition('state_id',$id);
+        //         $crud->setModel($city_model);
+        //     });
 
         // $crud = $this->add('CRUD');
         // $crud->setModel('Model_TransactionMaster');

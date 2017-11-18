@@ -54,7 +54,9 @@ input.ui-button,
 
 
 .icon-check,
-.icon-search {
+.icon-search,
+.ui-icon-triangle-1-s
+ {
   display: inline-block;
   font: normal normal normal 14px/1 FontAwesome;
   font-size: inherit;
@@ -76,4 +78,38 @@ input.ui-button,
 }
 .ui-dialog-titlebar-close:after {
   content: 'x';
+}
+
+.rgrid .atk-box-small{
+  min-height: 65px;
+}
+
+.rtabs div.ui-tabs-panel{
+  padding: 10px !important;
+}
+
+.atk4_grid .totals{
+  font-weight: bold;
+}
+
+.navbar{
+  background: #737373 !important;
+}
+
+.ui-icon:before{
+  font-family: FontAwesome !important;
+}
+.ui-icon-triangle-1-s:before{
+  content: "\f078";
+}
+
+.ui-icon-triangle-1-n:before{
+  content: "\f077";
+}
+
+.ui-icon-circle-triangle-e:before{
+  content: "\f054";
+}
+.ui-icon-circle-triangle-w:before{
+  content: "\f053";
 }

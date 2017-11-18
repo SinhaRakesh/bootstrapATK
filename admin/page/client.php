@@ -14,6 +14,6 @@ class page_client extends Page {
                 ['name','client_code','phone_number','email_id','state','city','is_active']
             );
         $crud->grid->addPaginator(50);
-        $crud->grid->addQuickSearch(['name','client_code']);
+        $crud->grid->addQuickSearch(['name','client_code'],['placeholder'=>'Search By Name or Client Id']);
     }
 }

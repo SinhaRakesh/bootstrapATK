@@ -14,7 +14,7 @@ class page_company extends Page {
                 ['sc_name','isin_code','last_update','closing_value','is_active']
             );
 
-        $crud->grid->addQuickSearch(['isin_code','sc_name']);
+        $crud->grid->addQuickSearch(['isin_code','sc_name'],['placeholder'=>'Search By Name or ISIN']);
         $crud->grid->addPaginator($ipp=50);
         
         $crud->grid->add('VirtualPage')
@@ -27,7 +27,7 @@ class page_company extends Page {
                 ;
             $m->setOrder('created_at','desc');
             $c = $page->add('CRUD');
-            $c->setModel($m);
+            $c->setModel($m,['last','created_at'],['company','open','high','low','close','last','prevclose','created_at']);
             $c->grid->addPaginator($ipp=50);
             
         });    

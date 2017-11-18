@@ -20,10 +20,14 @@ class Model_DailyBhav extends Model_Base_Table{
 		$this->addField('created_at')->type('datetime')->set($this->app->now);
 		$this->addField('import_date')->type('datetime')->system(true); // import date in software system
 
+		$this->addHook('beforeSave',$this);
 		// $this->add('dynamic_model/Controller_AutoCreator');
 	}
 
 	function beforeSave(){
+		if(!$this['created_at'])
+			$this['created_at'] = $this->app->now;
+		
 		if(!$this['import_date'])
 			$this['import_date'] = $this['created_at'];
 		

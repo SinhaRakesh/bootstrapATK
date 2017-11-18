@@ -9,11 +9,12 @@ class Model_Transaction extends Model_Base_Table{
 		parent::init();
 
 		if(!$this->from_date) $this->from_date = $this->app->today;
+		if(!$this->to_date) $this->to_date = $this->app->today;
 
 		// $this->addField('name');
 		$this->hasOne('TransactionMaster','transaction_master_id');
 		$this->hasOne('Client','client_id');
-		$this->hasOne('Company','company_id');
+		$this->hasOne('Company','company_id')->caption('Stock');
 
 		$this->addField('sheet_user_id'); // just saviing values
 		$this->addField('account_id'); // just saviing values
@@ -49,13 +50,16 @@ class Model_Transaction extends Model_Base_Table{
 			return $q->expr('IFNULL([0],0)',[$m->refSQL('transaction_master_id')->fieldQuery('name')]);
 		});
 
-		$this->addExpression('fifo_remaining_qty')->set(function($m,$q){
-			return $q->expr('(IFNULL([0],0) - IFNULL([1],0))',[$m->getElement('buy_qty'),$m->getElement('fifo_sell_qty')]);
-		})->type('number');
+		$this->addExpression('date_only')->set('Date_Format(created_at,"%d %M %Y")')->caption('Date');
 
-		$this->addExpression('fifo_sell_amount')->set(function($m,$q){
-			return $q->expr('IFNULL([0],0) * IFNULL([1],0)',[$m->getElement('fifo_sell_qty'),$m->getElement('fifo_sell_price')]);
-		});
+		// fifo sell Qty as on date
+		$this->addExpression('fifo_remaining_qty')->set(function($m,$q){
+			$s = $m->add('Model_FifoSell');
+			$s->addCondition('transaction_id',$m->getElement('id'));
+			$s->addCondition('sell_date','<',$this->app->nextDate($this->from_date));
+
+			return $q->expr('(IFNULL([0],0)-IFNULL([1],0))',[$m->getElement('buy_qty'),$s->sum('sell_qty')]);
+		})->type('Number');
 
 		$this->addExpression('company_latest_closing_value')->set(function($m,$q){
 			$db = $m->add('Model_DailyBhav',['table_alias'=>'dbv']);
@@ -64,20 +68,38 @@ class Model_Transaction extends Model_Base_Table{
 				->setOrder('created_at','desc')
 				->setLimit(1)
 				;
-			return $q->expr('[0]',[$db->fieldQuery('last')]);
+			return $q->expr('IFNULL([0],0)',[$db->fieldQuery('last')]);
 		})->type('money');
 
+		// $this->addExpression('fifo_sell_amount')->set(function($m,$q){
+		// 	return $q->expr('IFNULL([0],0) * IFNULL([1],0)',[$m->getElement('fifo_sell_qty'),$m->getElement('fifo_sell_price')]);
+		// });
+		// current stock holding by amount
 		$this->addExpression('fifo_buy_amount')->set(function($m,$q){
 			return $q->expr('IFNULL([0],0) * IFNULL([1],0)',[$m->getElement('fifo_remaining_qty'),$m->getElement('buy_value')]);
-		});
+		})->type('money');
 
 		$this->addExpression('current_buy_amount')->set(function($m,$q){
 			return $q->expr('IFNULL([0],0) * IFNULL([1],0)',[$m->getElement('fifo_remaining_qty'),$m->getElement('company_latest_closing_value')]);
-		});
+		})->type('money');
+
+		// $this->addExpression('buy_amount_on_date')->set(function($m,$q){
+		// 	return $q->expr('IFNULL([0],0) * IFNULL([1],0)',[$m->getElement('fifo_remaining_qty'),$m->getElement('buy_value')]);
+		// });
+
+		// $this->addExpression('current_buy_amount_on_date')->set(function($m,$q){
+		// 	return $q->expr('(IFNULL([0],0) * IFNULL([1],0))',[$m->getElement('net_qty'),$m->getElement('company_latest_closing_value')]);
+		// });
+
 
 		$this->addExpression('current_pl')->set(function($m,$q){
-			return $q->expr('([0]-[1])',[$m->getElement('current_buy_amount'),$m->getElement('fifo_buy_amount')]);
+			return $q->expr('(IFNULL([0],0)-IFNULL([1],0))',[$m->getElement('current_buy_amount'),$m->getElement('fifo_buy_amount')]);
 		})->type('money');
+
+		// $this->addExpression('current_pl_on_date')->set(function($m,$q){
+		// 	return $q->expr('(IFNULL([0],0)-IFNULL([1],0))',[$m->getElement('current_buy_amount_on_date'),$m->getElement('buy_amount_on_date')]);
+		// })->type('money');
+
 
 		// $this->addExpression('fifo_remaining_qty')->set('IFNULL(buy_qty,0) - IFNULL(fifo_sell_qty,0)')->type('Number');
 		// $this->addExpression('buy_amount')->set('IFNULL(buy_value,0) * IFNULL(buy_qty,0)');

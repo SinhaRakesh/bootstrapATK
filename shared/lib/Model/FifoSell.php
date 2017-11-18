@@ -7,14 +7,20 @@ class Model_FifoSell extends Model_Base_Table{
 		parent::init();
 
 		$this->hasOne('Transaction','transaction_id');
-		$this->hasOne('Company','company_id');
+		$this->hasOne('Company','company_id')->caption('Stock');
 		$this->hasOne('Client','client_id');
 		
 		$this->addField('sell_qty')->type('number');
 		$this->addField('sell_price')->type('number');
 		$this->addField('sell_date')->type('datetime');
-		$this->addField('buy_price')->type('number');
 
+		$this->addExpression('sell_date_only')->set(function($m,$q){
+            return $q->expr('Date_Format([0],"%d %M %Y")',[$m->getElement('sell_date')]);
+        })->caption('Sell Date');
+
+		$this->addExpression('buy_qty')->set($this->refSQL('transaction_id')->fieldQuery('buy_qty'));
+		$this->addField('buy_price')->type('number');
+		
 		$this->addExpression('fifo_sell_amount')->set('sell_price * sell_qty')->type('money');
 
 		// $this->addExpression('company_id')->set($this->refSQL('transaction_id')->fieldQuery('company_id'));

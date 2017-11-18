@@ -2028,21 +2028,21 @@ table {
   line-height: 1;
   width: 1em;
 }
-.ui-icon.ui-icon-triangle-1-s:before {
+/*.ui-icon.ui-icon-triangle-1-s:before {
   content: '\e8b0';
-}
+}*/
 .ui-icon.ui-icon-triangle-1-e:before {
   content: '\e8ae';
 }
-.ui-icon.ui-icon-circle-triangle-e:before {
+/*.ui-icon.ui-icon-circle-triangle-e:before {
   content: '\e8ae';
-}
-.ui-icon.ui-icon-circle-triangle-w:before {
+}*/
+/*.ui-icon.ui-icon-circle-triangle-w:before {
   content: '\e8ad';
-}
-.ui-icon.ui-icon-closethick:before {
+}*/
+/*.ui-icon.ui-icon-closethick:before {
   content: '\e821';
-}
+}*/
 html,
 body,
 .atk-layout {

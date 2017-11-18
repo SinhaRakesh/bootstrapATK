@@ -9,6 +9,7 @@ abstract class Export_Parser_Generic extends \AbstractController {
     public $debug = false;
     public $button_label = "Export Type";
     public $limit = false;
+    
     function init(){
         parent::init();
         $this->api->addHook("pre-render-output", array($this, "export"));
