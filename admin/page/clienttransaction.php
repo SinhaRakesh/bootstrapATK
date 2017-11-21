@@ -62,33 +62,43 @@ class page_clienttransaction extends Page {
         $form = $all->add('Form',null,null,['form/horizontal']);
         $fld_client = $form->addField('autocomplete/Basic','client');
         $fld_client->other_field->setAttr('placeholder', "Search By Name");
-
         $fld_client->setModel('Client');
+        $fld_client->set($_GET['a_client_id']);
 
         $fld_company = $form->addField('autocomplete/Basic','company','Stock');
         $fld_company->other_field->setAttr('placeholder', "Search By Name");
         $fld_company->setModel('Company');
+        $fld_company->set($_GET['a_company_id']);
 
-        $form->addField('DatePicker','from_date');
-        $form->addField('DatePicker','to_date');
+        $from_field = $form->addField('DatePicker','from_date');
+        $to_field = $form->addField('DatePicker','to_date')->set($this->app->today);
         $form->addSubmit('Filter');
 
         $tras = $this->add('Model_Transaction');
-        $tras->addCondition('client_id',$_GET['a_client_id']);
+        $field_to_show = ['date_only','company','buy_qty','buy_value','buy_amount','sell_qty','sell_value','sell_amount','fifo_remaining_qty'];
 
-        if($_GET['a_company_id'] > 0)
+        if($_GET['a_client_id']){
+            $tras->addCondition('client_id',$_GET['a_client_id']);
+        }else{
+            $field_to_show = ['client','date_only','company','buy_qty','buy_value','buy_amount','sell_qty','sell_value','sell_amount','fifo_remaining_qty'];
+        }
+
+        if($_GET['a_company_id'] > 0){
             $tras->addCondition('company_id',$_GET['a_company_id']);
+        }
 
         if(strtotime($_GET['a_from_date']) > 0){
             $tras->addCondition('created_at','>=',$_GET['a_from_date']);
+            $from_field->set($_GET['a_from_date']);
         }
         if(strtotime($_GET['a_to_date']) > 0){
             $tras->addCondition('created_at','<',$this->app->nextDate($_GET['a_to_date']));
+            $to_field->set($_GET['a_to_date']);
         }
         $tras->setOrder('created_at','desc');
 
         $a_grid = $all->add('Grid');
-        $a_grid->setModel($tras,['date_only','company','buy_qty','buy_value','buy_amount','sell_qty','sell_value','sell_amount','fifo_remaining_qty']);
+        $a_grid->setModel($tras,$field_to_show);
 
         if($tras->count()->getOne()){
             $a_grid->addTotals(['buy_amount','sell_amount','buy_qty','sell_qty']);
@@ -96,12 +106,13 @@ class page_clienttransaction extends Page {
         }    
 
         if($form->isSubmitted()){
-            $a_grid->js()->reload([
+            $reload = [
                         'a_client_id'=>$form['client'],
                         'a_company_id'=>$form['company'],
                         'a_from_date'=>$form['from_date'],
-                        'a_to_date'=>$form['to_date'],
-                    ])->execute();
+                        'a_to_date'=>$form['to_date']
+                    ];
+            $a_grid->js(null,$form->js()->reload($reload))->reload($reload)->execute();
         }
 
         // $all_crud = $only_transaction->add('CRUD',['allow_add'=>false]);
