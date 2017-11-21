@@ -16,7 +16,9 @@ class page_report extends Page {
         $fld_client->setModel('Client');
         // $fld_client->setEmptyText('All');
         $fld_client->set($c_id);
-
+        if($c_id){
+            $this->app->stickyForget('client');
+        }
         $fld_type = $form->addField('DropDown','report_type');
         $fld_type->setValueList([
                 'stock_report'=>'Stock Report (till date)',
@@ -42,7 +44,15 @@ class page_report extends Page {
         }
         
         if($type == "stock_report"){
-            $this->addStockReport($c_id);
+            if($c_id){
+                $this->addStockReport($c_id);
+            }else{
+                $client = $this->add('Model_Client');
+                $client->addCondition('is_active',true);
+                foreach ($client as $c) {
+                    $this->addStockReport($c->id);
+                }
+            }
 
         }elseif($type == "short_term"){
             $this->addShortTermReport($c_id);
@@ -61,7 +71,7 @@ class page_report extends Page {
         // $grid->addPaginator($ipp=25);
 
         if($form->isSubmitted()){
-            if($form['report_type'] == "stock_report" && !$form['client']) $form->error('client','must not be empty');
+            // if($form['report_type'] == "stock_report" && !$form['client']) $form->error('client','must not be empty');
             
             $this->js()->reload(['client'=>$form['client'],'type'=>$form['report_type'],'financial_year'=>$form['financial_year']])->execute();
         }
@@ -105,11 +115,14 @@ class page_report extends Page {
         
         $model->addCondition('created_at','>=',$this->financial_start_date);
         $model->addCondition('created_at','<',$this->financial_end_date);
+        if(!$model->count()->getOne()) return;
 
         $grid = $this->add('Grid');
-        $grid->setModel($model,['date','company','buy_qty','buy_value','buy_amount','fifo_remaining_qty','fifo_remaining_amount','cmp','cmp_amount','pl','gain']);
+        // $grid->add('View',null,'grid_buttons')->set($client_id);
+        $grid->setModel($model,['client','date','company','buy_qty','buy_value','buy_amount','fifo_remaining_qty','fifo_remaining_amount','cmp','cmp_amount','pl','gain']);
         $grid->add('misc/Export');
-        $grid->addPaginator($ipp=30);
+        $grid->addTotals(['buy_amount','fifo_remaining_amount','cmp_amount']);
+        // $grid->addPaginator($ipp=30);
 
         $grid->addHook('formatRow',function($g){
             if($g->model['pl'] < 0 ){
