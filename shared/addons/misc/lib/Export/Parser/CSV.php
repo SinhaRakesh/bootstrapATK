@@ -4,7 +4,7 @@ namespace misc;
 
 class Export_Parser_CSV extends Export_Parser_Generic {
     public $column_separator = ",";
-    public $row_separator = "\n";
+    public $row_separator = "\r\n";
     public $button_label = "Export CSV";
     function parse($captions, $data){
         $data = array_merge(array($captions), $data);

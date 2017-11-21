@@ -48,7 +48,7 @@ class Model_ClientData extends Model_Client{
 				->addCondition('sell_date','<',$this->app->nextDate($this->fin_end_date))
 				->addCondition('sell_duration','<',365)
 				;
-			return $q->expr('IFNULL(([total_sell_amount]/[total_buy_amount])*100,0)',
+			return $q->expr('IFNULL((([total_sell_amount]-[total_buy_amount])/[total_buy_amount])*100,0)',
 					[
 					'total_sell_amount'=>$tra->sum('fifo_sell_amount'),
 					'total_buy_amount'=>$tra->sum('fifo_buy_amount')
@@ -60,8 +60,8 @@ class Model_ClientData extends Model_Client{
 			$tra->addCondition('client_id',$m->getElement('id'))
 				->addCondition('sell_date','<',$this->fin_start_date)
 				;
-			
-			return $q->expr('IFNULL(([total_sell_amount]/[total_buy_amount])*100,0)',
+
+			return $q->expr('IFNULL((([total_sell_amount]-[total_buy_amount])/[total_buy_amount])*100,0)',
 					[
 					'total_sell_amount'=>$tra->sum('fifo_sell_amount'),
 					'total_buy_amount'=>$tra->sum('fifo_buy_amount')

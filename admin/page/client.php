@@ -8,6 +8,7 @@ class page_client extends Page {
         parent::init();
 
         $model = $this->add('Model_Client');
+        $model->setOrder('name','asc');
         $crud = $this->add('CRUD');
         $crud->setModel($model,
                 ['name','client_code','phone_number','email_id','address1','address2','state_id','city_id','pin_code','is_active'],
