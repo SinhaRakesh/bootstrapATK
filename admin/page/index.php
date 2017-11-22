@@ -32,7 +32,7 @@ class page_index extends Page {
 
         $m->getElement('buy_value')->caption('Share Value (INR) as on <br/>'.$on_date_read);
         $m->getElement('buy_current_value')->caption('Current Value (INR)');
-        // $m->getElement('profit')->caption('Profit/<p style="color:red;">Loss</p>');
+        $m->getElement('profit')->caption('Profit/<p style="color:red;">Loss</p>');
         
         $grid = $this->add('Grid');
         $grid->addClass('rgrid');

@@ -147,6 +147,15 @@ class page_report extends Page {
             $tra = $this->add('Model_FifoSell');
             $tra->addExpression('total_sell_amount')->set('sum(sell_price * sell_qty)')->type('money');
             $tra->addExpression('total_buy_amount')->set('sum(buy_price * sell_qty)')->type('money');
+            
+            $tra->addExpression('long_term_amount')->set(function($m,$q){
+                return $q->expr('([total_sell_amount]-[total_buy_amount])',
+                        [
+                        'total_sell_amount'=>$m->getElement('total_sell_amount'),
+                        'total_buy_amount'=>$m->getElement('total_buy_amount')
+                    ]);
+            })->type('money')->caption('Long Term Capital Gain');
+
             $tra->addExpression('LTCP')->set(function($m,$q){
                 return $q->expr('IFNULL((([total_sell_amount]-[total_buy_amount])/[total_buy_amount])*100,0)',
                         [
@@ -154,6 +163,7 @@ class page_report extends Page {
                         'total_buy_amount'=>$m->getElement('total_buy_amount')
                     ]);
             })->type('money')->caption('LTCG %');
+
             if($client_id)
                 $tra->addCondition('client_id',$client_id);
 
@@ -167,11 +177,12 @@ class page_report extends Page {
                 $tra->_dsql()->group('company_id');
 
             $grid = $this->add('Grid');
-            $grid->setModel($tra,['client','company','total_buy_amount','total_sell_amount','LTCP']);
+            $grid->setModel($tra,['client','company','total_buy_amount','total_sell_amount','long_term_amount','LTCP']);
             // $grid->addPaginator($ipp=50);
 
             $grid->addHook('formatRow',function($g){
                 $g->current_row_html['LTCP'] = round(abs($g->model['LTCP']),2);
+                $g->current_row_html['long_term_amount'] = round(abs($g->model['long_term_amount']),2);
             });
 
             $grid->addHook('formatTotalsRow',function($g){
@@ -270,6 +281,13 @@ class page_report extends Page {
             $tra = $this->add('Model_FifoSell');
             $tra->addExpression('total_sell_amount')->set('sum(sell_price * sell_qty)')->type('money');
             $tra->addExpression('total_buy_amount')->set('sum(buy_price * sell_qty)')->type('money');
+            $tra->addExpression('short_term_amount')->set(function($m,$q){
+                return $q->expr('([total_sell_amount]-[total_buy_amount])',
+                        [
+                        'total_sell_amount'=>$m->getElement('total_sell_amount'),
+                        'total_buy_amount'=>$m->getElement('total_buy_amount')
+                    ]);
+            })->type('money')->caption('Short Term Capital Gain');
 
             $tra->addExpression('STCP')->set(function($m,$q){
                 return $q->expr('((([total_sell_amount]-[total_buy_amount])/[total_buy_amount])*100)',
@@ -294,11 +312,12 @@ class page_report extends Page {
                 $tra->_dsql()->group('client_id');
 
             $grid = $this->add('Grid');
-            $grid->setModel($tra,['client','company','total_buy_amount','total_sell_amount','STCP']);
+            $grid->setModel($tra,['client','company','total_buy_amount','total_sell_amount','short_term_amount','STCP']);
             // $grid->addPaginator($ipp=50);
 
             $grid->addHook('formatRow',function($g){
                 $g->current_row_html['STCP'] = round(abs($g->model['STCP']),2);
+                $g->current_row_html['short_term_amount'] = round(abs($g->model['short_term_amount']),2);
             });
 
             $grid->addHook('formatTotalsRow',function($g){

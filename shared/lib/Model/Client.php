@@ -9,8 +9,8 @@ class Model_Client extends Model_Base_Table{
 		$this->hasOne('State','state_id');
 		$this->hasOne('City','city_id');
 		
-		$this->addField('name');
-		$this->addField('client_code')->caption('Client ID');
+		$this->addField('name')->sortable('true');
+		$this->addField('client_code')->caption('Client ID')->sortable('true');
 		$this->addField('phone_number');
 		$this->addField('email_id');
 		$this->addField('address1');
