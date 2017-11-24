@@ -180,29 +180,28 @@ class page_report extends Page {
             $grid->setModel($tra,['client','company','total_buy_amount','total_sell_amount','long_term_amount','LTCP']);
             // $grid->addPaginator($ipp=50);
 
+            if($tra->count()->getOne()){
+                $ex_btn = $grid->addButton('Export CSV');
+                $ex_btn->js("click")->univ()->location($this->api->url(null, array($ex_btn->name => "1")));
+
+                $grid->addTotals(['total_sell_amount','total_buy_amount','long_term_amount','LTCP']);
+
+                if($_GET[$ex_btn->name] == "1"){
+                    $this->app->stickyForget($ex_btn->name);
+                    $this->export('long');
+                }    
+                // $grid->add('misc/Export');
+            }
+
             $grid->addHook('formatRow',function($g){
                 $g->current_row_html['LTCP'] = round(abs($g->model['LTCP']),2);
                 $g->current_row_html['long_term_amount'] = round(abs($g->model['long_term_amount']),2);
             });
 
             $grid->addHook('formatTotalsRow',function($g){
-               $g->current_row_html['LTCP'] = round((($g->totals['total_sell_amount'] - $g->totals['total_buy_amount'])/$g->totals['total_buy_amount'])*100,2);
+               $g->current_row_html['LTCP'] = "<strong style='color:red;'>".abs(round((($g->totals['total_sell_amount'] - $g->totals['total_buy_amount'])/$g->totals['total_buy_amount'])*100,2))."</strong>";
+               $g->current_row_html['long_term_amount'] = abs(round((($g->totals['total_sell_amount'] - $g->totals['total_buy_amount'])),2));
             });
-
-
-            if($tra->count()->getOne()){
-                $ex_btn = $grid->addButton('Export CSV');
-                $ex_btn->js("click")->univ()->location($this->api->url(null, array($ex_btn->name => "1")));
-
-                $grid->addTotals(['total_sell_amount','total_buy_amount','LTCP']);
-
-                if($_GET[$ex_btn->name] == "1"){
-                    $this->app->stickyForget($ex_btn->name);
-                    $this->export('long');
-                }
-                
-                // $grid->add('misc/Export');
-            }
 
             $grid->add('VirtualPage')
                 ->addColumn('detail','Detail')
@@ -287,7 +286,7 @@ class page_report extends Page {
                         'total_sell_amount'=>$m->getElement('total_sell_amount'),
                         'total_buy_amount'=>$m->getElement('total_buy_amount')
                     ]);
-            })->type('money')->caption('Short Term Capital Gain');
+            })->type('Money')->caption('Short Term Capital Gain');
 
             $tra->addExpression('STCP')->set(function($m,$q){
                 return $q->expr('((([total_sell_amount]-[total_buy_amount])/[total_buy_amount])*100)',
@@ -316,19 +315,20 @@ class page_report extends Page {
             // $grid->addPaginator($ipp=50);
 
             $grid->addHook('formatRow',function($g){
-                $g->current_row_html['STCP'] = round(abs($g->model['STCP']),2);
-                $g->current_row_html['short_term_amount'] = round(abs($g->model['short_term_amount']),2);
+                $g->current_row_html['STCP'] = round(abs($g->model['STCP']),2);  
+                $g->current_row_html['short_term_amount'] = round(abs($g->model['short_term_amount']),2);  
             });
 
             $grid->addHook('formatTotalsRow',function($g){
-               $g->current_row_html['STCP'] = round((($g->totals['total_sell_amount'] - $g->totals['total_buy_amount'])/$g->totals['total_buy_amount'])*100,2);
+               $g->current_row_html['STCP'] = abs(round((($g->totals['total_sell_amount'] - $g->totals['total_buy_amount'])/$g->totals['total_buy_amount'])*100,2));
+               $g->current_row_html['short_term_amount'] = abs(round(($g->totals['total_sell_amount'] - $g->totals['total_buy_amount']),2));
             });
 
             if($tra->count()->getOne()){
                 $ex_btn = $grid->addButton('Export CSV');
                 $ex_btn->js("click")->univ()->location($this->api->url(null, array($ex_btn->name => "1")));
 
-                $grid->addTotals(['total_sell_amount','total_buy_amount','STCP']);
+                $grid->addTotals(['total_sell_amount','total_buy_amount','short_term_amount','STCP']);
                 if($_GET[$ex_btn->name] == "1"){
                     $this->app->stickyForget($ex_btn->name);
                     $this->export('short');

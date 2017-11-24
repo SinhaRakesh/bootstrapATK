@@ -56,7 +56,7 @@ class page_index extends Page {
                 ->addCondition('client_id',$id)
                 ->addCondition('created_at','>=',$this->on_date)
                 ->addCondition('created_at','<',$this->app->nextDate($this->on_date))
-                ->addCondition('net_qty','>',0)
+                // ->addCondition('net_qty','>',0)
                 ;
 
             $g = $page->add('Grid');
@@ -68,7 +68,6 @@ class page_index extends Page {
                 $g->add('misc/Export');
             }
         });
-
         // $strtotime = strtotime($on_date);
         // $fin_start_date = (date('m',$strtotime) < '04') ? date('Y-04-01',strtotime('-1 year',$strtotime)) : date('Y-04-01',$strtotime);
         // $end_start_date = date('Y-03-t',strtotime('+1 year',strtotime($fin_start_date)));
