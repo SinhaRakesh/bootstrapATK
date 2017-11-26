@@ -3,6 +3,7 @@
 class page_report extends Page {
 
     public $title='Report';
+    public $allStockData = [];
 
     function init() {
         parent::init();
@@ -10,15 +11,14 @@ class page_report extends Page {
         $type = $this->app->stickyGET('type');
         $c_id = $this->app->stickyGET('client');
         $f_year = $this->app->stickyGET('financial_year');
-        
+        // $type = $_GET['type'];
+        // $c_id = $_GET['client'];
+        // $f_year = $_GET['financial_year'];
+
         $form = $this->add('Form',null,null,['form/horizontal']);
         $fld_client = $form->addField('autocomplete/Basic','client');
         $fld_client->setModel('Client');
-        // $fld_client->setEmptyText('All');
-        $fld_client->set($c_id);
-        if($c_id){
-            $this->app->stickyForget('client');
-        }
+
         $fld_type = $form->addField('DropDown','report_type');
         $fld_type->setValueList([
                 'stock_report'=>'Stock Report (till date)',
@@ -45,41 +45,40 @@ class page_report extends Page {
         
         if($type == "stock_report"){
             if($c_id){
-                $this->addStockReport($c_id);
+                $this->addStockReport($c_id,$is_single = 1);
             }else{
+
+                $this->all_export = $this->add('Button')->set('Export All Client CSV File')->setStyle('margin-top','10px');
+                $this->all_export->js("click")->univ()->location($this->api->url(null, array($this->all_export->name => "1")));
+
                 $client = $this->add('Model_Client');
                 $client->addCondition('is_active',true);
                 foreach ($client as $c) {
-                    $this->addStockReport($c->id);
+                    $this->addStockReport($c->id,0);
                 }
             }
 
-        }elseif($type == "short_term"){
-            $this->addShortTermReport($c_id);
-            // $field_to_show = ['name','client_code','short_total_buy_amount','short_total_sell_amount','short_term_capital_gain'];
-        }elseif($type == "long_term"){
-            $this->addLongTermReport($c_id);
-            // $field_to_show = ['name','client_code','long_total_buy_amount','long_total_sell_amount','long_term_capital_gain'];
+        }
+        // elseif($type == "short_term"){
+        //     $this->addShortTermReport($c_id);
+        //     // $field_to_show = ['name','client_code','short_total_buy_amount','short_total_sell_amount','short_term_capital_gain'];
+        // }elseif($type == "long_term"){
+        //     $this->addLongTermReport($c_id);
+        //     // $field_to_show = ['name','client_code','long_total_buy_amount','long_total_sell_amount','long_term_capital_gain'];
+        // }
+
+        if(isset($this->all_export) && $_GET[$this->all_export->name]){
+            $this->exportAllStock();
         }
 
-        // $client_data = $this->add('Model_ClientData');
-        // if($c_id = $_GET['client'])
-        //     $client_data->addCondition('id',$c_id);
-        // $field_to_show = ['name','client_code'];
-        // $grid = $this->add('Grid');
-        // $grid->setModel($client_data,$field_to_show);
-        // $grid->addPaginator($ipp=25);
-
         if($form->isSubmitted()){
-            // if($form['report_type'] == "stock_report" && !$form['client']) $form->error('client','must not be empty');
-            
             $this->js()->reload(['client'=>$form['client'],'type'=>$form['report_type'],'financial_year'=>$form['financial_year']])->execute();
         }
 
     }
 
 
-    function addStockReport($client_id){
+    function addStockReport($client_id,$is_single=1,$return_data=0){
         $model = $this->add('Model_Transaction');
         $model->addExpression('date')->set('Date_Format(created_at,"%d %M %Y")')->caption('Buy Date');
         $model->getElement('company_id')->caption('Stock');
@@ -118,12 +117,13 @@ class page_report extends Page {
         if(!$model->count()->getOne()) return;
 
         $grid = $this->add('Grid');
-        // $grid->add('View',null,'grid_buttons')->set($client_id);
         $grid->setModel($model,['client','date','company','buy_qty','buy_value','buy_amount','fifo_remaining_qty','fifo_remaining_amount','cmp','cmp_amount','pl','gain']);
-        $grid->add('misc/Export');
+
+        if($is_single)
+            $grid->add('misc/Export');
+
         $grid->addTotals(['buy_amount','fifo_remaining_amount','cmp_amount']);
         // $grid->addPaginator($ipp=30);
-
         $grid->addHook('formatRow',function($g){
             if($g->model['pl'] < 0 ){
                 $g->current_row_html['pl'] = abs($g->model['pl']);
@@ -181,16 +181,16 @@ class page_report extends Page {
             // $grid->addPaginator($ipp=50);
 
             if($tra->count()->getOne()){
-                $ex_btn = $grid->addButton('Export CSV');
-                $ex_btn->js("click")->univ()->location($this->api->url(null, array($ex_btn->name => "1")));
+                // $ex_btn = $grid->addButton('Export CSV');
+                // $ex_btn->js("click")->univ()->location($this->api->url(null, array($ex_btn->name => "1")));
 
                 $grid->addTotals(['total_sell_amount','total_buy_amount','long_term_amount','LTCP']);
 
-                if($_GET[$ex_btn->name] == "1"){
-                    $this->app->stickyForget($ex_btn->name);
-                    $this->export('long');
-                }    
-                // $grid->add('misc/Export');
+                // if($_GET[$ex_btn->name] == "1"){
+                //     $this->app->stickyForget($ex_btn->name);
+                //     $this->export('long');
+                // }    
+                $grid->add('misc/Export');
             }
 
             $grid->addHook('formatRow',function($g){
@@ -501,4 +501,100 @@ class page_report extends Page {
         exit;
 
     }
+
+
+    function exportAllStock(){
+        $model = $this->add('Model_Transaction');
+        $model->addExpression('date')->set('Date_Format(created_at,"%d %M %Y")')->caption('Buy Date');
+        $model->getElement('company_id')->caption('Stock');
+        $model->getElement('fifo_remaining_qty')->caption('Hold Qty');
+
+        $model->addExpression('fifo_remaining_amount')->set(function($m,$q){
+            return $q->expr('([0] * [1])',[$m->getElement('fifo_remaining_qty'),$m->getElement('buy_value')]);
+        })->type('money')->caption('Hold Amount');
+
+        $model->addExpression('cmp')->set(function($m,$q){
+            $c = $m->add('Model_DailyBhav')
+                ->addCondition('company_id',$m->getElement('company_id'))
+                ->setOrder('created_at','desc')
+                ->setLimit(1)
+                ;
+            return $q->expr('IFNULL([0],0)',[$c->fieldQuery('last')]);
+        })->type('money')->caption('Current Value (CMP)');
+
+        $model->addExpression('cmp_amount')->set(function($m,$q){
+            return $q->expr('([0] * [1])',[$m->getElement('fifo_remaining_qty'),$m->getElement('cmp')]);
+        })->type('money')->caption('Current Value Amount');
+
+        $model->addExpression('pl')->set(function($m,$q){
+            return $q->expr('([0]-[1])',[$m->getElement('cmp_amount'),$m->getElement('fifo_remaining_amount')]);
+        })->type('money')->caption('Profit/<span style="color:red;"> Loss</span>');
+
+        $model->addExpression('gain')->set(function($m,$q){
+            return $q->expr('(([0]/[1])*100)',[$m->getElement('pl'),$m->getElement('fifo_remaining_amount')]);
+        })->type('money')->caption('Gain %');
+
+        $model->addCondition('fifo_remaining_qty','>',0);
+        $model->addCondition('created_at','>=',$this->financial_start_date);
+        $model->addCondition('created_at','<',$this->financial_end_date);
+        $model->setOrder('created_at','desc');
+
+        $record = $model->getRows();
+        
+        // // [client_id] = ['0'=[],'1'=[]]        
+        $client_data = [];
+        foreach ($record as $table_id=>$data) {
+            if(!isset($client_data[$data['client_id']])){
+                $client_data[$data['client_id']] = [];
+                $client_data[$data['client_id']]['totals'] = ['buy_amount'=>0,'fifo_remaining_amount'=>0,'cmp_amount'=>0];
+            } 
+
+            $t = [
+                    'client'=>$data['client'],
+                    'date'=>$data['date'],
+                    'company'=>$data['company'],
+                    'buy_qty'=>$data['buy_qty'],
+                    'buy_value'=>$data['buy_value'],
+                    'buy_amount'=>$data['buy_amount'],
+                    'fifo_remaining_qty'=>$data['fifo_remaining_qty'],
+                    'fifo_remaining_amount'=>$data['fifo_remaining_amount'],
+                    'cmp'=>$data['cmp'],
+                    'cmp_amount'=>$data['cmp_amount'],
+                    'pl'=>$data['pl'],
+                    'gain'=>$data['gain']
+                ];
+            $client_data[$data['client_id']][] = $t;
+
+            $client_data[$data['client_id']]['totals'] = [
+                                    'buy_amount'=> $data['buy_amount']+ $client_data[$data['client_id']]['totals']['buy_amount'],
+                                    'fifo_remaining_amount'=>  $data['fifo_remaining_amount']+ $client_data[$data['client_id']]['totals']['fifo_remaining_amount'],
+                                    'cmp_amount'=>  $data['cmp_amount']+ $client_data[$data['client_id']]['totals']['cmp_amount'],
+                            ];
+        }
+
+
+        $output_type = "text/csv";
+        $output_disposition = "attachment";
+        $output = "Client, Date, Company, Buy Qty, Buy Value, Buy Amount, Hold Qty, Hold Amount, Current Value (CMP), Current Value Amount , Profit / Loss, Gain (%)"."\r\n";
+
+        foreach ($client_data as $c_id => $values) {
+            foreach ($values as $key => $value) {
+                if($key != "totals")
+                    $output .= $value['client'].",".$value['date'].",".$value['company'].",".$value['buy_qty'].",".$value['buy_value'].",".$value['buy_amount'].",".$value['fifo_remaining_qty'].",".$value['fifo_remaining_amount'].",".$value['cmp'].",".$value['cmp_amount'].",".$value['pl'].",".round($value['gain'],2)."\n\r";
+                }
+            $value = $values['totals'];
+            $output .= "Total,".",".",".",".",".$value['buy_amount'].",".",".$value['fifo_remaining_amount'].",".",".$value['cmp_amount'].",".",".","."\n\r";
+            $output .= "".",".",".",".",".",".",".",".",".",".",".","."\n\r";
+                
+        }
+
+        trim($output,",");
+        $output_filename = "All-client-stock-report-of-".$_GET['financial_year'].".csv";
+        header("Content-type: " . $output_type);
+        header("Content-disposition: " . $output_disposition . "; filename=\"" . $output_filename . "\"");
+        header("Content-Length: " . strlen($output));
+        print $output;
+        exit;
+    }
+
 }
