@@ -52,7 +52,7 @@ class Model_Company extends Model_Base_Table{
 			$import_date = $this->app->now;
 
 		try{
-
+			$count = 0;
 			$this->app->db->beginTransaction();
 			$insert_query = "INSERT into daily_bhav (company_id,open,high,low,close,last,prevclose,trading_date,created_at,import_date) VALUES ";
 			// record
@@ -77,6 +77,7 @@ class Model_Company extends Model_Base_Table{
 				$company_id = $company_list[$sc_name];
 
 				$insert_query .= "('".$company_id."','".$data['OPEN']."','".$data['HIGH']."','".$data['LOW']."','".$data['CLOSE']."','".$data['LAST']."','".$data['PREVCLOSE']."','".date('Y-m-d', strtotime($data['TRADING_DATE']))."','".date('Y-m-d', strtotime($data['TRADING_DATE']))."','".$import_date."'),";
+				$count++;				
 			}
 			$insert_query = trim($insert_query,',');
 
@@ -86,6 +87,8 @@ class Model_Company extends Model_Base_Table{
 			$this->api->db->rollback();
 			throw new \Exception($e->getMessage());
 		}
+
+		return $count;
 	}
 
 }
