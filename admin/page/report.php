@@ -58,14 +58,13 @@ class page_report extends Page {
                 }
             }
 
+        }elseif($type == "short_term"){
+            $this->addShortTermReport($c_id);
+            // $field_to_show = ['name','client_code','short_total_buy_amount','short_total_sell_amount','short_term_capital_gain'];
+        }elseif($type == "long_term"){
+            $this->addLongTermReport($c_id);
+            // $field_to_show = ['name','client_code','long_total_buy_amount','long_total_sell_amount','long_term_capital_gain'];
         }
-        // elseif($type == "short_term"){
-        //     $this->addShortTermReport($c_id);
-        //     // $field_to_show = ['name','client_code','short_total_buy_amount','short_total_sell_amount','short_term_capital_gain'];
-        // }elseif($type == "long_term"){
-        //     $this->addLongTermReport($c_id);
-        //     // $field_to_show = ['name','client_code','long_total_buy_amount','long_total_sell_amount','long_term_capital_gain'];
-        // }
 
         if(isset($this->all_export) && $_GET[$this->all_export->name]){
             $this->exportAllStock();
@@ -265,18 +264,10 @@ class page_report extends Page {
     }
 
     function addShortTermReport($client_id){
-        // $on_date = $this->app->stickyGET('date');
-        // if(!$on_date) $on_date = $this->app->today;
-
-        // $strtotime = strtotime($on_date);
-        // $fin_start_date = (date('m',$strtotime) < '04') ? date('Y-04-01',strtotime('-1 year',$strtotime)) : date('Y-04-01',$strtotime);
-        // $fin_end_date = date('Y-03-t',strtotime('+1 year',strtotime($fin_start_date)));
 
         $fin_start_date = $this->financial_start_date;
         $fin_end_date = $this->financial_end_date;
         
-        // if($client_id){
-
             $tra = $this->add('Model_FifoSell');
             $tra->addExpression('total_sell_amount')->set('sum(sell_price * sell_qty)')->type('money');
             $tra->addExpression('total_buy_amount')->set('sum(buy_price * sell_qty)')->type('money');
@@ -371,34 +362,6 @@ class page_report extends Page {
                     });
 
             });  
-        // }else{
-
-        //     $m = $this->add('Model_ClientData',['fin_start_date'=>$this->financial_start_date,'fin_end_date'=>$this->financial_end_date]);
-        //     $m->addExpression('total_buy_amount')->set(function($m,$q){
-        //         $tra = $m->add('Model_FifoSell',['table_alias'=>'stcgtotalbuy']);
-        //         $tra->addCondition('client_id',$m->getElement('id'))
-        //             ->addCondition('sell_date','>=',$this->financial_start_date)
-        //             ->addCondition('sell_date','<',$this->app->nextDate($this->financial_end_date))
-        //             ->addCondition('sell_duration','<',365)
-        //             ;
-        //         return $q->expr('[0]',[$tra->sum('fifo_buy_amount')]);
-        //     })->type('money');
-
-        //     $m->addExpression('total_sell_amount')->set(function($m,$q){
-        //         $tra = $m->add('Model_FifoSell',['table_alias'=>'stcgtotalsell']);
-        //         $tra->addCondition('client_id',$m->getElement('id'))
-        //             ->addCondition('sell_date','>=',$this->financial_start_date)
-        //             ->addCondition('sell_date','<',$this->app->nextDate($this->financial_end_date))
-        //             ->addCondition('sell_duration','<',365)
-        //             ;
-        //         return $q->expr('[0]',[$tra->sum('fifo_sell_amount')]);
-        //     })->type('money');
-
-        //     $m->setOrder('short_term_capital_gain','desc');
-
-        //     $grid = $this->add('Grid');
-        //     $grid->setModel($m,['name','total_buy_amount','total_sell_amount','short_term_capital_gain']);
-        // }
 
     }
 
@@ -452,7 +415,13 @@ class page_report extends Page {
     }
 
     function export($type){
-        $c_model = $this->add('Model_Client')->load($_GET['client']);
+        if($_GET['client']){
+            $c_model = $this->add('Model_Client')->load($_GET['client']);
+            $c_name = $c_model['name'];
+        }else{
+            $c_name = "All";
+        }
+
 
         $output_type = "text/csv";
         $output_disposition = "attachment";
@@ -465,22 +434,26 @@ class page_report extends Page {
         })->caption('Buy Date');
         
         if($type == "short"){
-            $output_filename = str_replace(" ", "_",$c_model['name'])."-ShortTerm-".$_GET['financial_year']."csv";
+            $output_filename = str_replace(" ", "_",$c_name)."-ShortTerm-".$_GET['financial_year']."csv";
 
-            $m->addCondition('client_id',$_GET['client']);
+            if($_GET['client'])
+                $m->addCondition('client_id',$_GET['client']);
             $m->addCondition('sell_date','>=',$this->financial_start_date);
             $m->addCondition('sell_date','<',$this->app->nextDate($this->financial_end_date));
             $m->addCondition('sell_duration','<=',365);
         }
         
         if($type == "long"){
-            $output_filename = str_replace(" ", "_",$c_model['name'])."-LongTerm-".$_GET['financial_year'].".csv";
-            $m->addCondition('client_id',$_GET['client']);
+            $output_filename = str_replace(" ", "_",$c_name)."-LongTerm-".$_GET['financial_year'].".csv";
+            
+            if($_GET['client'])
+                $m->addCondition('client_id',$_GET['client']);
+
             $m->addCondition('sell_date','>=',$this->financial_start_date);
             $m->addCondition('sell_date','<',$this->app->nextDate($this->financial_end_date));
             $m->addCondition('sell_duration','>',365);
         }
-
+        
         $totals = [];
         foreach ($m as $record) {
             $output .= $record['client'].",".$record['company'].",".$record['date'].",".$record['buy_qty'].",".$record['buy_price'].",".$record['buy_amount'].",".$record['sell_date_only'].",".$record['sell_qty'].",".$record['sell_price'].",".$record['sell_amount'].",".$record['pl'].",".round($record['gain'],2)."\n";
