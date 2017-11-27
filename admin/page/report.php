@@ -21,7 +21,7 @@ class page_report extends Page {
 
         $fld_type = $form->addField('DropDown','report_type');
         $fld_type->setValueList([
-                'stock_report'=>'Stock Report (till date)',
+                'stock_report'=>'Stock Report ('.date("d-M-Y",strtotime($this->app->today)).')',
                 'short_term'=>'Short Term Report',
                 'long_term'=>'Long Term Report'
             ]);
@@ -170,9 +170,9 @@ class page_report extends Page {
                 ->addCondition('sell_date','<',$this->app->nextDate($fin_end_date))
                 ->addCondition('sell_duration','>',365)
                 ;
-            if(!$client_id)
+            // if(!$client_id)
                 $tra->_dsql()->group('client_id');
-            else
+            // else
                 $tra->_dsql()->group('company_id');
 
             $grid = $this->add('Grid');
@@ -296,10 +296,11 @@ class page_report extends Page {
                 ->addCondition('sell_duration','<=',365)
                 ;
 
-            if($client_id)
-                $tra->_dsql()->group('company_id');
-            else
-                $tra->_dsql()->group('client_id');
+            // if($client_id)
+            $tra->_dsql()->group('company_id');
+            $tra->_dsql()->group('client_id');
+            $tra->setOrder('client_id');
+            // else
 
             $grid = $this->add('Grid');
             $grid->setModel($tra,['client','company','total_buy_amount','total_sell_amount','short_term_amount','STCP']);

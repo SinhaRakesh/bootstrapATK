@@ -3,6 +3,8 @@
 namespace misc;
 class Export_Basic extends \AbstractController {
     public $fields = array();
+    public $fields_to_remove = ['id','transaction_master_id','client_id','company_id','transaction_id'];
+
     function init(){
         parent::init();
         $this->api->addHook("pre-render-output", array($this, "export"));
@@ -66,6 +68,24 @@ class Export_Basic extends \AbstractController {
                     $captions[$key] = $key;
                 } 
             }
+        }
+
+        if(count($this->fields_to_remove)){
+            foreach ($this->fields_to_remove as $key => $name) {
+                if(isset($captions[$name]))
+                    unset($captions[$name]);
+            }
+
+            $data_new = [];
+            foreach ($data as $key => $value) {
+                foreach ($this->fields_to_remove as $key => $name) {
+                    if(isset($value[$name]))
+                        unset($value[$name]);
+                }
+                $data_new[] = $value;
+            }
+
+            $data = $data_new;
         }
         $this->captions = $captions;
         $this->data = $data;
